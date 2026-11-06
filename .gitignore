@@ -1,0 +1,7 @@
+includes/config.php
+uploads/photos/*
+uploads/site/*
+storage/documents/*
+!**/.gitkeep
+.DS_Store
+Thumbs.db

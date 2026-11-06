@@ -1,0 +1,35 @@
+# Uploads the site to InfinityFree (kmproperties.page.gd) by FTP on every push to main.
+# FTP login: repository secrets FTP_USERNAME (if0_43311913) and FTP_PASSWORD
+#   (GitHub › Settings › Secrets and variables › Actions › Secrets).
+# Upload folder: /kmproperties.page.gd/htdocs/ — override with repository variable FTP_SERVER_DIR if it ever changes.
+# includes/config.php (the server's database login) and uploaded files (uploads/photos, uploads/site,
+# storage/documents) are never uploaded or deleted, so deploys can't wipe live data.
+name: Deploy to InfinityFree
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+concurrency:
+  group: deploy
+  cancel-in-progress: false
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ftpupload.net
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          server-dir: ${{ vars.FTP_SERVER_DIR || '/kmproperties.page.gd/htdocs/' }}
+          exclude: |
+            **/.git*
+            **/.git*/**
+            .github/**
+            includes/config.php
+            uploads/photos/**
+            uploads/site/**
+            storage/documents/**
+            *.md
+            K&M Urban Properties City Living.png
