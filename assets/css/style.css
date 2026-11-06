@@ -273,3 +273,12 @@ a:hover { color: var(--navy); }
 .steps-list span { color: var(--muted); font-size: .95rem; }
 .prop-map { height: 320px; border-radius: 14px; overflow: hidden; z-index: 0; }
 .preview-bar { background: #fff3cd; color: #664d03; border-bottom: 1px solid #ffe69c; padding: .6rem 0; font-size: .92rem; }
+
+/* Announcement bar (1.6.0) */
+.ann-bar { font-size: .92rem; padding: .45rem 0; }
+.ann-bar .container-xl { display: flex; flex-wrap: wrap; gap: .4rem 1rem; align-items: center; justify-content: center; text-align: center; }
+.ann-bar a { font-weight: 600; text-decoration: none; color: inherit; border-bottom: 1px solid currentColor; }
+.ann-gold { background: var(--gold); color: var(--on-gold); }
+.ann-teal { background: var(--teal); color: #fff; }
+.ann-navy { background: var(--navy-deep); color: #fff; }
+.ann-red { background: #b42318; color: #fff; }

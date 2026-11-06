@@ -29,7 +29,14 @@ $ogImage = isset($ogImage) ? $ogImage : url('assets/img/hero.jpg');
 <?= isset($extraHead) ? $extraHead : '' ?>
 </head>
 <body>
-<header class="site-header sticky-top">
+<?php $hc = site_header_cfg(); $callNum = $hc['call_number'] !== '' ? $hc['call_number'] : $phone; ?>
+<?php if ($hc['ann']['show'] && $hc['ann']['text'] !== ''): ?>
+<div class="ann-bar ann-<?= e($hc['ann']['style']) ?>"><div class="container-xl">
+  <span><?= e($hc['ann']['text']) ?></span>
+  <?php if ($hc['ann']['link'] !== ''): ?><a href="<?= e(safe_link($hc['ann']['link'])) ?>"><?= e($hc['ann']['link_text'] ?: 'Learn more') ?> <i class="bi bi-arrow-right"></i></a><?php endif; ?>
+</div></div>
+<?php endif; ?>
+<header class="site-header<?= $hc['sticky'] ? ' sticky-top' : '' ?>">
   <nav class="navbar navbar-expand-lg navbar-dark">
     <div class="container-xl">
       <a class="navbar-brand" href="<?= url('index.php') ?>"><img src="<?= e($logoDark) ?>" alt="<?= e($siteName) ?>" class="brand-logo"></a>
@@ -38,41 +45,37 @@ $ogImage = isset($ogImage) ? $ogImage : url('assets/img/hero.jpg');
       </button>
       <div class="collapse navbar-collapse" id="mainNav">
         <ul class="navbar-nav mx-auto align-items-lg-center">
-          <li class="nav-item"><a class="nav-link<?= $activeNav === 'home' ? ' active' : '' ?>" href="<?= url('index.php') ?>">Home</a></li>
-          <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle<?= $activeNav === 'rent' ? ' active' : '' ?>" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Condos for Rent</a>
-            <ul class="dropdown-menu">
-              <li><a class="dropdown-item" href="<?= url('properties.php?type=rent') ?>">All rentals</a></li>
-              <li><hr class="dropdown-divider"></li>
-              <?php foreach (unit_types() as $ut): ?>
-                <li><a class="dropdown-item" href="<?= url('properties.php?type=rent&unit=' . urlencode($ut)) ?>"><?= e($ut) ?></a></li>
-              <?php endforeach; ?>
-            </ul>
-          </li>
-          <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle<?= $activeNav === 'sale' ? ' active' : '' ?>" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Condos for Sale</a>
-            <ul class="dropdown-menu">
-              <li><a class="dropdown-item" href="<?= url('properties.php?type=sale') ?>">All for sale</a></li>
-              <li><hr class="dropdown-divider"></li>
-              <?php foreach (unit_types() as $ut): ?>
-                <li><a class="dropdown-item" href="<?= url('properties.php?type=sale&unit=' . urlencode($ut)) ?>"><?= e($ut) ?></a></li>
-              <?php endforeach; ?>
-            </ul>
-          </li>
-          <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle<?= $activeNav === 'locations' ? ' active' : '' ?>" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Locations</a>
-            <ul class="dropdown-menu">
-              <?php foreach ($navLocations as $loc): ?>
-                <li><a class="dropdown-item" href="<?= url('properties.php?location=' . urlencode($loc['slug'])) ?>"><?= e($loc['name']) ?></a></li>
-              <?php endforeach; ?>
-            </ul>
-          </li>
-          <li class="nav-item"><a class="nav-link<?= $activeNav === 'list' ? ' active' : '' ?>" href="<?= url('list-property.php') ?>">List Your Property</a></li>
-          <li class="nav-item"><a class="nav-link<?= $activeNav === 'about' ? ' active' : '' ?>" href="<?= url('about.php') ?>">About Us</a></li>
-          <li class="nav-item"><a class="nav-link<?= $activeNav === 'contact' ? ' active' : '' ?>" href="<?= url('contact.php') ?>">Contact Us</a></li>
+          <?php foreach ($hc['nav'] as $key => $item): if (!$item['show']) { continue; } $on = $activeNav === $key ? ' active' : ''; ?>
+            <?php if ($key === 'rent' || $key === 'sale'): ?>
+              <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle<?= $on ?>" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false"><?= e($item['label']) ?></a>
+                <ul class="dropdown-menu">
+                  <li><a class="dropdown-item" href="<?= url('properties.php?type=' . $key) ?>"><?= $key === 'rent' ? 'All rentals' : 'All for sale' ?></a></li>
+                  <li><hr class="dropdown-divider"></li>
+                  <?php foreach (unit_types() as $ut): ?>
+                    <li><a class="dropdown-item" href="<?= url('properties.php?type=' . $key . '&unit=' . urlencode($ut)) ?>"><?= e($ut) ?></a></li>
+                  <?php endforeach; ?>
+                </ul>
+              </li>
+            <?php elseif ($key === 'locations'): ?>
+              <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle<?= $on ?>" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false"><?= e($item['label']) ?></a>
+                <ul class="dropdown-menu">
+                  <?php foreach ($navLocations as $loc): ?>
+                    <li><a class="dropdown-item" href="<?= url('properties.php?location=' . urlencode($loc['slug'])) ?>"><?= e($loc['name']) ?></a></li>
+                  <?php endforeach; ?>
+                </ul>
+              </li>
+            <?php else: $href = ['home' => 'index.php', 'list' => 'list-property.php', 'about' => 'about.php', 'contact' => 'contact.php'][$key]; ?>
+              <li class="nav-item"><a class="nav-link<?= $on ?>" href="<?= url($href) ?>"><?= e($item['label']) ?></a></li>
+            <?php endif; ?>
+          <?php endforeach; ?>
+          <?php foreach ($hc['links'] as $lk): ?>
+            <li class="nav-item"><a class="nav-link" href="<?= e(safe_link($lk['url'])) ?>"<?= $lk['new'] ? ' target="_blank" rel="noopener"' : '' ?>><?= e($lk['label']) ?></a></li>
+          <?php endforeach; ?>
         </ul>
-        <?php if ($phone): ?>
-          <a class="btn btn-gold btn-call" href="tel:<?= e(preg_replace('~[^0-9+]~', '', $phone)) ?>"><i class="bi bi-telephone-fill me-2"></i>Call Us</a>
+        <?php if ($hc['call_show'] && $callNum): ?>
+          <a class="btn btn-gold btn-call" href="tel:<?= e(preg_replace('~[^0-9+]~', '', $callNum)) ?>"><i class="bi bi-telephone-fill me-2"></i><?= e($hc['call_label']) ?></a>
         <?php endif; ?>
       </div>
     </div>
