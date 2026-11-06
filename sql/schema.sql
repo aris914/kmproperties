@@ -132,6 +132,7 @@ CREATE TABLE IF NOT EXISTS tenants (
   employer VARCHAR(150) NULL,
   id_type VARCHAR(60) NULL,
   id_number VARCHAR(80) NULL,
+  id_expiry DATE NULL,
   address VARCHAR(255) NULL,
   emergency_name VARCHAR(120) NULL,
   emergency_phone VARCHAR(60) NULL,

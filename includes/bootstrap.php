@@ -4,8 +4,8 @@
  */
 
 define('APP_ROOT', dirname(__DIR__));
-define('APP_VERSION', '1.3.1');
-define('DB_VERSION', '1.3.0'); // newest sql/update-x.y.z.sql
+define('APP_VERSION', '1.4.0');
+define('DB_VERSION', '1.4.0'); // newest sql/update-x.y.z.sql
 
 if (!file_exists(__DIR__ . '/config.php')) {
     $installer = (strpos($_SERVER['SCRIPT_NAME'] ?? '', '/admin/') !== false ? '../' : '') . 'install.php';

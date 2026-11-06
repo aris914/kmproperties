@@ -117,10 +117,47 @@ document.addEventListener('DOMContentLoaded', function () {
   document.querySelectorAll('input[name="listing_type"]').forEach(function (r) { r.addEventListener('change', syncListingType); });
   syncListingType();
 
+  // ID photos / document uploads: shrink large photos in the browser (max 2000 px JPEG), preview at once,
+  // and keep only one of the paired "Take photo" / "Upload" inputs filled for the same ID side.
+  function shrink(file) {
+    return new Promise(function (resolve) {
+      if (!/^image\/(jpeg|png|webp)$/.test(file.type)) { resolve(file); return; }
+      var img = new Image(), u = URL.createObjectURL(file);
+      img.onload = function () {
+        var s = Math.min(1, 2000 / Math.max(img.width, img.height));
+        if (s === 1 && file.size < 1200 * 1024) { URL.revokeObjectURL(u); resolve(file); return; }
+        var c = document.createElement('canvas');
+        c.width = Math.round(img.width * s); c.height = Math.round(img.height * s);
+        c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+        c.toBlob(function (b) { URL.revokeObjectURL(u); resolve(b ? new File([b], file.name.replace(/\.\w+$/, '') + '.jpg', { type: 'image/jpeg' }) : file); }, 'image/jpeg', 0.86);
+      };
+      img.onerror = function () { URL.revokeObjectURL(u); resolve(file); };
+      img.src = u;
+    });
+  }
+  document.querySelectorAll('input[type=file][data-resize]').forEach(function (fi) {
+    fi.addEventListener('change', function () {
+      var files = Array.prototype.slice.call(fi.files);
+      if (!files.length) return;
+      if (fi.dataset.pair) { var other = fi.form && fi.form.querySelector('input[name="' + fi.dataset.pair + '"]'); if (other) other.value = ''; }
+      var box = fi.dataset.preview ? document.querySelector(fi.dataset.preview) : null;
+      Promise.all(files.map(shrink)).then(function (done) {
+        if (typeof DataTransfer !== 'undefined') { var dt = new DataTransfer(); done.forEach(function (f) { dt.items.add(f); }); fi.files = dt.files; }
+        if (box) {
+          var f = done[0];
+          box.innerHTML = /^image\//.test(f.type)
+            ? '<div class="id-thumb"><img alt="" src="' + URL.createObjectURL(f) + '"></div><div class="hint mt-1 text-success"><i class="bi bi-check2"></i> New photo — saved when you click Save tenant</div>'
+            : '<div class="id-thumb is-file"><i class="bi bi-file-earmark-pdf"></i><span></span></div><div class="hint mt-1 text-success"><i class="bi bi-check2"></i> Saved when you click Save tenant</div>';
+          var sp = box.querySelector('span'); if (sp) sp.textContent = f.name;
+        }
+      });
+    });
+  });
+
   // Warn before uploads larger than the server allows
   document.querySelectorAll('input[type="file"]').forEach(function (fi) {
     fi.addEventListener('change', function () {
-      var big = Array.prototype.filter.call(fi.files, function (f) { return f.size > 10 * 1024 * 1024; });
+      var big = Array.prototype.filter.call(fi.files, function (f) { return f.size > 10 * 1024 * 1024 && !(fi.hasAttribute('data-resize') && /^image\//.test(f.type)); });
       if (big.length) alert(big.length + ' file(s) are over 10 MB and will probably be rejected by the server.');
     });
   });

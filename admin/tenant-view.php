@@ -57,7 +57,7 @@ admin_header(tenant_name($t), 'tenants');
         <?php
         $facts = [
             'Birth date' => fmt_date($t['birth_date']), 'Occupation' => $t['occupation'] ?: '—', 'Employer' => $t['employer'] ?: '—',
-            'Valid ID' => trim($t['id_type'] . ' ' . $t['id_number']) ?: '—', 'Address' => $t['address'] ?: '—',
+            'Valid ID' => trim($t['id_type'] . ' ' . $t['id_number']) ?: '—', 'ID expiry' => fmt_date($t['id_expiry'] ?? null), 'Address' => $t['address'] ?: '—',
             'Emergency contact' => $t['emergency_name'] ? $t['emergency_name'] . ($t['emergency_relation'] ? ' (' . $t['emergency_relation'] . ')' : '') . ' ' . $t['emergency_phone'] : '—',
             'Tenant since' => fmt_date($t['created_at']),
         ];
@@ -69,6 +69,20 @@ admin_header(tenant_name($t), 'tenants');
     </div></div>
   </div>
   <div class="col-xl-4">
+    <?php $tdocs = tenant_docs($id); ?>
+    <div class="card mb-4">
+      <div class="card-header d-flex justify-content-between align-items-center"><span><i class="bi bi-person-vcard me-1"></i>Valid ID</span><?= id_expiry_badge($t['id_expiry'] ?? null) ?></div>
+      <div class="card-body">
+        <div class="small mb-2"><b><?= e($t['id_type'] ?: 'ID type not set') ?></b><?= $t['id_number'] ? ' · ' . e($t['id_number']) : '' ?></div>
+        <div class="row g-2">
+          <?php foreach (['front' => 'Front', 'back' => 'Back'] as $side => $label): ?>
+            <div class="col-6"><?= $tdocs[$side] ? doc_thumb($tdocs[$side]) : '<div class="id-thumb empty"><i class="bi bi-person-vcard"></i>No ' . strtolower($label) . '</div>' ?><div class="hint text-center mt-1"><?= $label ?></div></div>
+          <?php endforeach; ?>
+        </div>
+        <a href="<?= url('admin/tenant-edit.php?id=' . $id) ?>#validId" class="btn btn-sm btn-light mt-2"><i class="bi bi-camera me-1"></i><?= $tdocs['front'] ? 'Update ID photos' : 'Add ID photos' ?></a>
+        <?php if ($tdocs['other']): ?><a href="<?= url('admin/tenant-view.php?id=' . $id . '&tab=documents') ?>" class="btn btn-sm btn-light mt-2"><i class="bi bi-folder2-open me-1"></i><?= count($tdocs['other']) ?> other document<?= count($tdocs['other']) === 1 ? '' : 's' ?></a><?php endif; ?>
+      </div>
+    </div>
     <div class="card mb-4"><div class="card-body small">
       <div class="d-flex justify-content-between"><span>Leases</span><strong><?= count($leases) ?></strong></div>
       <div class="d-flex justify-content-between"><span>Total paid (all time)</span><strong><?= money($totalPaid, 2) ?></strong></div>
@@ -147,6 +161,7 @@ admin_header(tenant_name($t), 'tenants');
 
 <?php elseif ($tab === 'documents'): ?>
 <div class="card"><div class="card-body">
+  <p class="mb-2"><a href="<?= url('admin/tenant-edit.php?id=' . $id) ?>#validId" class="btn btn-sm btn-navy"><i class="bi bi-camera me-1"></i>Upload ID photos (front / back)</a></p>
   <p class="small text-muted">Valid IDs, proof of income, application form, NBI clearance, etc. Lease contracts can also be uploaded on each lease.</p>
   <?php documents_panel('tenant', $id, $self, ['Valid ID', 'Proof of income', 'Application form', 'Clearance', 'Contract', 'Receipt', 'Other']); ?>
 </div></div>

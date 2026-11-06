@@ -108,6 +108,65 @@ function td_photo($label, $seed)
     return $name;
 }
 
+/** A made-up ID card photo (front or back) saved as the tenant's Valid ID document. */
+function td_id_card(array $t, $side)
+{
+    if (!function_exists('imagecreatetruecolor')) {
+        return false;
+    }
+    $w = 1000;
+    $h = 630;
+    $im = imagecreatetruecolor($w, $h);
+    imagefilledrectangle($im, 0, 0, $w, $h, imagecolorallocate($im, 236, 242, 247));
+    imagefilledrectangle($im, 0, 0, $w, 120, imagecolorallocate($im, 0, 56, 101));
+    $txt = function ($str, $x, $y, $scale, $rgb) use ($im) {
+        $lw = strlen($str) * 9 + 4;
+        $lab = imagecreatetruecolor($lw, 18);
+        $bg = imagecolorallocate($lab, 255, 0, 255);
+        imagefill($lab, 0, 0, $bg);
+        imagecolortransparent($lab, $bg);
+        imagestring($lab, 5, 2, 1, $str, imagecolorallocate($lab, $rgb[0], $rgb[1], $rgb[2]));
+        imagecopyresized($im, $lab, $x, $y, 0, 0, (int) ($lw * $scale), (int) (18 * $scale), $lw, 18);
+        imagedestroy($lab);
+    };
+    $txt('REPUBLIC OF THE PHILIPPINES - SAMPLE', 30, 22, 2.2, [255, 255, 255]);
+    $txt(strtoupper($t['id_type']) . ' - TEST DATA', 30, 70, 1.6, [244, 194, 91]);
+    if ($side === 'front') {
+        imagefilledrectangle($im, 40, 160, 300, 500, imagecolorallocate($im, 190, 205, 220));
+        imagefilledellipse($im, 170, 270, 130, 150, imagecolorallocate($im, 120, 140, 160));
+        imagefilledellipse($im, 170, 470, 230, 190, imagecolorallocate($im, 120, 140, 160));
+        $txt('LAST NAME', 340, 170, 1.3, [90, 100, 110]);
+        $txt(strtoupper($t['last_name']), 340, 200, 2.6, [20, 30, 40]);
+        $txt('GIVEN NAME', 340, 270, 1.3, [90, 100, 110]);
+        $txt(strtoupper($t['first_name']), 340, 300, 2.6, [20, 30, 40]);
+        $txt('DATE OF BIRTH  ' . $t['birth_date'], 340, 380, 1.6, [20, 30, 40]);
+        $txt('ID NO.  ' . $t['id_number'], 340, 430, 1.6, [20, 30, 40]);
+        $txt('VALID UNTIL  ' . $t['id_expiry'], 340, 480, 1.6, [20, 30, 40]);
+    } else {
+        $txt('ADDRESS: ' . strtoupper($t['address']), 40, 170, 1.6, [20, 30, 40]);
+        $txt('EMERGENCY: ' . strtoupper($t['emergency_name']), 40, 220, 1.6, [20, 30, 40]);
+        for ($i = 0; $i < 60; $i++) { // barcode
+            $bw = mt_rand(2, 7);
+            imagefilledrectangle($im, 40 + $i * 14, 330, 40 + $i * 14 + $bw, 470, imagecolorallocate($im, 20, 30, 40));
+        }
+        $txt('NOT A REAL ID - MADE BY ADMIN > TEST DATA', 40, 520, 1.6, [192, 57, 43]);
+    }
+    $sub = date('Y/m');
+    if (!is_dir(DOC_DIR . '/' . $sub)) {
+        mkdir(DOC_DIR . '/' . $sub, 0755, true);
+    }
+    $file = $sub . '/test-' . bin2hex(random_bytes(10)) . '.jpg';
+    imagejpeg($im, DOC_DIR . '/' . $file, 85);
+    imagedestroy($im);
+    $u = current_user();
+    db_insert('documents', [
+        'entity_type' => 'tenant', 'entity_id' => $t['id'], 'title' => 'Valid ID — ' . $t['id_type'] . ' (' . $side . ')', 'category' => 'Valid ID',
+        'file' => $file, 'original_name' => 'id-' . $side . '-sample.jpg', 'mime' => 'image/jpeg',
+        'size' => (int) filesize(DOC_DIR . '/' . $file), 'uploaded_by' => $u ? $u['id'] : null,
+    ]);
+    return true;
+}
+
 /** A small one-page PDF with a title and some lines. */
 function td_pdf($title, array $lines)
 {
@@ -232,7 +291,7 @@ function td_populate(array $opt)
             'first_name' => $fn, 'last_name' => $ln, 'email' => strtolower($fn . '.' . str_replace(' ', '', $ln)) . mt_rand(1, 99) . '@example.com',
             'phone' => '09' . mt_rand(170000000, 199999999), 'birth_date' => td_day(-mt_rand(23, 50) * 365), 'occupation' => td_pick(TD_JOBS_EMP),
             'employer' => td_pick(['Accenture PH', 'BDO', 'Globe Telecom', 'St. Luke\'s', 'Ayala Land', 'Jollibee Foods', 'Concentrix', 'PLDT']),
-            'id_type' => td_pick(['Passport', "Driver's License", 'UMID', 'PhilSys National ID']), 'id_number' => 'T' . mt_rand(10000000, 99999999),
+            'id_type' => td_pick(['Passport', "Driver's License", 'UMID', 'PhilSys National ID']), 'id_number' => 'T' . mt_rand(10000000, 99999999), 'id_expiry' => td_day(mt_rand(-40, 1500)),
             'address' => td_pick(['Cebu City', 'Davao City', 'Iloilo City', 'Baguio City', 'Batangas City', 'Laguna']),
             'emergency_name' => td_pick(TD_FIRST) . ' ' . $ln, 'emergency_phone' => '09' . mt_rand(170000000, 199999999), 'emergency_relation' => td_pick(['Mother', 'Father', 'Sister', 'Brother', 'Spouse']),
             'status' => 'prospect', 'notes' => 'TEST DATA', 'is_test' => 1,
@@ -241,9 +300,16 @@ function td_populate(array $opt)
         log_history(null, $t['id'], 'created', 'Tenant record created', 'Test data', td_day(-mt_rand(60, 400)));
         $tenants[] = $t;
         $out['tenants']++;
-        if ($withDocs && $i % 2 === 0) {
-            td_doc('tenant', $t['id'], 'Valid ID - ' . $fn . ' ' . $ln, 'Valid ID', [$t['id_type'] . ' no. ' . $t['id_number'], 'Name: ' . $fn . ' ' . $ln, 'Birth date: ' . $t['birth_date']]);
-            $out['documents']++;
+        if ($withDocs && $i % 3 !== 2) { // most test tenants get ID photos (front and back)
+            foreach (['front', 'back'] as $side) {
+                if (td_id_card($t, $side)) {
+                    $out['documents']++;
+                }
+            }
+            if ($i % 2 === 0) {
+                td_doc('tenant', $t['id'], 'Certificate of employment - ' . $fn . ' ' . $ln, 'Certificate of employment', ['Employee: ' . $fn . ' ' . $ln, 'Position: ' . $t['occupation'], 'Employer: ' . $t['employer'], 'Monthly salary: PHP ' . number_format(mt_rand(35, 120) * 1000)]);
+                $out['documents']++;
+            }
         }
     }
 

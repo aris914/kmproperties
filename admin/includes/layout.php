@@ -207,3 +207,53 @@ document.getElementById('rejectModal').addEventListener('show.bs.modal', functio
 </script>
     <?php
 }
+
+/* ---------- Tenant ID photos & documents (1.4.0) ---------- */
+
+/** A tenant's documents split into the ID front, ID back and everything else. */
+function tenant_docs($tenantId)
+{
+    $out = ['front' => null, 'back' => null, 'other' => []];
+    foreach (q_all("SELECT * FROM documents WHERE entity_type = 'tenant' AND entity_id = ? ORDER BY created_at DESC, id DESC", [(int) $tenantId]) as $d) {
+        $side = null;
+        if ($d['category'] === 'Valid ID') {
+            if (substr($d['title'], -7) === '(front)') {
+                $side = 'front';
+            } elseif (substr($d['title'], -6) === '(back)') {
+                $side = 'back';
+            }
+        }
+        if ($side && !$out[$side]) {
+            $out[$side] = $d;
+        } else {
+            $out['other'][] = $d;
+        }
+    }
+    return $out;
+}
+
+/** Thumbnail (images) or file icon (PDF etc.) linking to the private file. */
+function doc_thumb(array $d, $cls = 'id-thumb')
+{
+    $href = url('admin/download.php?id=' . (int) $d['id']);
+    if (strpos((string) $d['mime'], 'image/') === 0) {
+        return '<a href="' . $href . '" target="_blank" class="' . $cls . '" title="' . e($d['title']) . '"><img src="' . $href . '" alt="' . e($d['title']) . '" loading="lazy"></a>';
+    }
+    return '<a href="' . $href . '" target="_blank" class="' . $cls . ' is-file" title="' . e($d['title']) . '"><i class="bi ' . doc_icon($d['original_name']) . '"></i><span>' . e($d['original_name']) . '</span></a>';
+}
+
+/** Expiry badge for an ID date. */
+function id_expiry_badge($date)
+{
+    if (!$date) {
+        return '';
+    }
+    $days = (int) floor((strtotime($date) - strtotime(date('Y-m-d'))) / 86400);
+    if ($days < 0) {
+        return '<span class="badge text-bg-danger">ID expired ' . fmt_date($date) . '</span>';
+    }
+    if ($days <= 60) {
+        return '<span class="badge text-bg-warning">ID expires ' . fmt_date($date) . '</span>';
+    }
+    return '<span class="badge text-bg-light">Valid until ' . fmt_date($date) . '</span>';
+}

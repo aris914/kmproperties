@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.4.0 — 2026-11-06
+- **Tenant ID photos and documents on the tenant form** (Add / Edit tenant):
+  - New **Valid ID** card: ID type, number, **expiry date**, and **Front** and **Back** photo slots. "Take photo" opens the phone camera; "Upload" takes an image or PDF. Photos are made smaller before upload, preview right away, and a new photo replaces the old one on save. Remove buttons per side.
+  - New **Other documents** card: upload several files at once with a category (proof of income, certificate of employment, payslip, bank statement, NBI / police or barangay clearance, application form, contract, other) and an optional title; see, download or delete existing ones.
+  - Everything is saved privately (admins only), added to the tenant's history and the audit log.
+- Tenant page shows the ID photos with an expiry badge (expired / expiring within 60 days) and an "Update ID photos" button; the Documents tab links to the ID upload.
+- Test Data now creates ID card images (front and back) and certificates of employment for test tenants.
+- Database: adds the ID expiry date (applied automatically after the deploy).
+
 ## 1.3.1 — 2026-11-06
 - Fix: browsers kept showing the old logo with a navy box after 1.3.0; the logo now reloads with each version. No database update.
 
