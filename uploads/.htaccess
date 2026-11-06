@@ -1,10 +1,7 @@
 # Uploaded images are public, but nothing in here may run as a script.
-Options -Indexes
-<FilesMatch "\.(php|php\d|phtml|phar|pl|py|cgi|sh|htaccess)$">
-  <IfModule mod_authz_core.c>Require all denied</IfModule>
+# (Kept minimal: InfinityFree returns 500 for RemoveHandler / php_flag here.)
+<FilesMatch "\.(php|php\d|phtml|phar|pl|py|cgi|sh)$">
+  <IfModule mod_authz_core.c>
+    Require all denied
+  </IfModule>
 </FilesMatch>
-<IfModule mod_php.c>
-  php_flag engine off
-</IfModule>
-RemoveHandler .php .phtml .php3 .php4 .php5 .php7 .php8
-RemoveType .php .phtml
