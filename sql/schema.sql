@@ -72,6 +72,9 @@ CREATE TABLE IF NOT EXISTS properties (
   building VARCHAR(150) NULL,
   unit_no VARCHAR(40) NULL,
   address VARCHAR(255) NULL,
+  latitude DECIMAL(10,7) NULL,
+  longitude DECIMAL(10,7) NULL,
+  show_map TINYINT(1) NOT NULL DEFAULT 1,
   price DECIMAL(14,2) NOT NULL DEFAULT 0,
   price_period VARCHAR(20) NULL,
   bedrooms TINYINT UNSIGNED NOT NULL DEFAULT 0,
@@ -83,7 +86,15 @@ CREATE TABLE IF NOT EXISTS properties (
   description TEXT NULL,
   amenities TEXT NULL,
   status ENUM('available','reserved','rented','sold','inactive') NOT NULL DEFAULT 'available',
+  approval ENUM('approved','pending','rejected') NOT NULL DEFAULT 'approved',
+  is_visible TINYINT(1) NOT NULL DEFAULT 1,
   is_featured TINYINT(1) NOT NULL DEFAULT 0,
+  source ENUM('admin','owner') NOT NULL DEFAULT 'admin',
+  submitted_at DATETIME NULL,
+  submitter_ip VARCHAR(45) NULL,
+  reviewed_at DATETIME NULL,
+  reviewed_by INT UNSIGNED NULL,
+  review_note VARCHAR(255) NULL,
   owner_name VARCHAR(150) NULL,
   owner_phone VARCHAR(60) NULL,
   owner_email VARCHAR(190) NULL,
@@ -93,6 +104,7 @@ CREATE TABLE IF NOT EXISTS properties (
   updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   KEY idx_prop_listing (listing_type, status),
   KEY idx_prop_location (location_id),
+  KEY idx_prop_public (approval, is_visible, status),
   CONSTRAINT fk_prop_location FOREIGN KEY (location_id) REFERENCES locations(id) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 

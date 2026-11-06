@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.2.0 — 2026-11-06
+- **List Your Property** now creates a real listing: owners add details, amenities, up to 12 photos (made smaller in the browser so they upload quickly) and a **map pin** (search the building, use their location, or click the map). Spam protection: hidden bot field and 3 submissions per hour.
+- Submissions wait for approval and stay hidden. New **Admin › Owner Submissions** (with a badge for pending ones): review, edit, preview, then **Approve & publish**, **Approve, keep hidden**, or **Reject** with a reason. The dashboard shows a notice when submissions are waiting. Each submission is also saved as an inquiry.
+- **Show / hide on website** for every property: a Shown / Hidden button on the property list and property page, a switch on the edit form, and a "Website" filter. Hidden listings keep working for leases, repairs and documents. Signed-in admins can preview hidden listings on the website.
+- **Map pin** on every property (admin edit form), with a map and "Open in Google Maps" on the property page (can be turned off per property).
+- Database updates now apply **automatically** on the first page load after a deploy (this also applies the 1.1.0 security tables) — no phpMyAdmin step needed.
+
 ## 1.1.0 — 2026-11-06
 - **Admin security** (Admin › Security), modelled on the RBJocsing portal:
   - IP address rules: Always allow (whitelist) and Blocked (blacklist) lists — single addresses, ranges (`/24`) or wildcards (`*`), with notes.

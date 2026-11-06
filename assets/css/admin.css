@@ -252,3 +252,14 @@ body.lay-float .lnav, body.lay-float .lmain { background: var(--card); box-shado
 .login-wrap { flex: 1; display: grid; place-items: center; padding: 24px 14px; }
 .login-card { background: var(--card); border-radius: 16px; width: 100%; max-width: 400px; padding: 28px; box-shadow: 0 20px 50px rgba(0, 0, 0, .35); }
 .login-card h1 { font-size: 1.35rem; font-weight: 600; margin: 0 0 4px; }
+
+/* Owner submissions (1.2.0) */
+.sub-card { overflow: hidden; }
+.sub-img { width: 100%; height: 100%; min-height: 170px; max-height: 230px; object-fit: cover; display: block; background: var(--primary); }
+.map-box { height: 320px; border-radius: 12px; overflow: hidden; border: 1px solid var(--line); z-index: 0; }
+.map-tools { display: flex; flex-wrap: wrap; gap: .5rem; margin-bottom: .6rem; }
+.map-tools .input-group { flex: 1 1 240px; }
+.review-bar { border-radius: 12px; padding: .9rem 1.1rem; margin-bottom: 1rem; display: flex; flex-wrap: wrap; gap: .6rem; align-items: center; }
+.review-bar.pending { background: color-mix(in srgb, var(--hl) 22%, var(--panel)); border: 1px solid color-mix(in srgb, var(--hl) 55%, transparent); }
+.review-bar.rejected { background: color-mix(in srgb, var(--danger) 12%, var(--panel)); border: 1px solid color-mix(in srgb, var(--danger) 40%, transparent); }
+.review-bar.hidden { background: var(--soft); border: 1px dashed var(--line); }

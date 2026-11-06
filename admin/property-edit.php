@@ -58,7 +58,17 @@ if (is_post()) {
         'owner_phone' => nn(post('owner_phone')),
         'owner_email' => nn(post('owner_email')),
         'internal_notes' => nn(post('internal_notes')),
+        'show_map' => post('show_map') ? 1 : 0,
     ];
+    // Map pin
+    $lat = post('latitude') !== '' ? (float) post('latitude') : null;
+    $lng = post('longitude') !== '' ? (float) post('longitude') : null;
+    $okPin = $lat !== null && $lng !== null && $lat >= -90 && $lat <= 90 && $lng >= -180 && $lng <= 180;
+    $data['latitude'] = $okPin ? $lat : null;
+    $data['longitude'] = $okPin ? $lng : null;
+    // Show on website: only approved listings can be shown (owner submissions are approved on their page)
+    $approved = !$p || !isset($p['approval']) || $p['approval'] === 'approved';
+    $data['is_visible'] = $approved && post('is_visible') ? 1 : 0;
 
     if ($data['title'] === '') {
         flash('error', 'Please enter a title.');
@@ -67,7 +77,7 @@ if (is_post()) {
         $data['slug'] = unique_slug('properties', post('slug') ?: $data['title'], $id);
         if ($p) {
             // Describe what changed for the property history
-            $labels = ['price' => 'Price', 'status' => 'Status', 'listing_type' => 'Listing type', 'furnishing' => 'Furnishing', 'owner_name' => 'Owner', 'title' => 'Title'];
+            $labels = ['price' => 'Price', 'status' => 'Status', 'listing_type' => 'Listing type', 'furnishing' => 'Furnishing', 'owner_name' => 'Owner', 'title' => 'Title', 'is_visible' => 'Shown on website', 'latitude' => 'Map pin'];
             $changes = [];
             foreach ($labels as $k => $label) {
                 if ((string) $p[$k] !== (string) $data[$k] && !($k === 'price' && (float) $p[$k] === (float) $data[$k])) {
@@ -141,7 +151,11 @@ admin_header($p && !empty($p['id']) ? 'Edit property' : 'Add property', 'propert
           <div class="col-md-4"><label class="form-label">Status</label><select name="status" class="form-select"><?= select_options($statuses, $v('status', 'available'), true) ?></select></div>
           <div class="col-md-4"><label class="form-label">Property type</label><select name="property_type" class="form-select"><?= select_options(property_types(), $v('property_type', 'Condominium')) ?></select></div>
           <div class="col-md-4"><label class="form-label">Unit type</label><select name="unit_type" class="form-select"><option value="">—</option><?= select_options(unit_types(), $v('unit_type')) ?></select></div>
-          <div class="col-12"><div class="form-check form-switch"><input class="form-check-input" type="checkbox" name="is_featured" value="1" id="feat" <?= $v('is_featured') ? 'checked' : '' ?>><label class="form-check-label" for="feat">Featured — show first on the homepage</label></div></div>
+          <div class="col-12 d-flex flex-wrap gap-4">
+            <?php $approvedNow = !isset($p['approval']) || $p['approval'] === 'approved'; ?>
+            <div class="form-check form-switch"><input class="form-check-input" type="checkbox" name="is_visible" value="1" id="vis" <?= $approvedNow && (int) $v('is_visible', 1) ? 'checked' : '' ?> <?= $approvedNow ? '' : 'disabled' ?>><label class="form-check-label" for="vis"><i class="bi bi-eye me-1"></i>Show on website<?= $approvedNow ? '' : ' <span class="text-muted">(approve the submission first)</span>' ?></label></div>
+            <div class="form-check form-switch"><input class="form-check-input" type="checkbox" name="is_featured" value="1" id="feat" <?= $v('is_featured') ? 'checked' : '' ?>><label class="form-check-label" for="feat">Featured — show first on the homepage</label></div>
+          </div>
         </div>
       </div>
 
@@ -152,6 +166,23 @@ admin_header($p && !empty($p['id']) ? 'Edit property' : 'Add property', 'propert
           <div class="col-md-5"><label class="form-label">Building / project</label><input name="building" class="form-control" maxlength="150" value="<?= e($v('building')) ?>"></div>
           <div class="col-md-3"><label class="form-label">Unit no. <small class="text-muted">(private)</small></label><input name="unit_no" class="form-control" maxlength="40" value="<?= e($v('unit_no')) ?>"></div>
           <div class="col-12"><label class="form-label">Address shown on website</label><input name="address" class="form-control" maxlength="255" value="<?= e($v('address')) ?>"></div>
+        </div>
+      </div>
+
+      <div class="card mb-4" id="mapCard">
+        <div class="card-header">Map pin</div>
+        <div class="card-body">
+          <?php list($mc, $mj) = map_assets(); echo $mc . $mj; ?>
+          <div class="map-tools">
+            <div class="input-group"><input class="form-control" data-map-search placeholder="Search building or address" maxlength="150"><button type="button" class="btn btn-navy" data-map-go><i class="bi bi-search"></i></button></div>
+            <button type="button" class="btn btn-light" data-map-me><i class="bi bi-crosshair me-1"></i>My location</button>
+            <button type="button" class="btn btn-light" data-map-clear>Clear pin</button>
+          </div>
+          <div class="map-box" data-map-picker data-lat="#lat" data-lng="#lng"></div>
+          <div class="small text-muted mt-1" data-map-status></div>
+          <input type="hidden" name="latitude" id="lat" value="<?= e($v('latitude')) ?>">
+          <input type="hidden" name="longitude" id="lng" value="<?= e($v('longitude')) ?>">
+          <div class="form-check form-switch mt-2"><input class="form-check-input" type="checkbox" name="show_map" value="1" id="showMap" <?= (int) $v('show_map', 1) ? 'checked' : '' ?>><label class="form-check-label" for="showMap">Show the map on the property page</label></div>
         </div>
       </div>
 

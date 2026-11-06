@@ -7,6 +7,11 @@ function admin_nav()
     $isAdmin = $u && $u['role'] === 'admin';
     $newInq = (int) q_val("SELECT COUNT(*) FROM inquiries WHERE status = 'new'");
     $openJobs = (int) q_val("SELECT COUNT(*) FROM maintenance WHERE status IN ('open','scheduled','in_progress')");
+    try {
+        $pendingSubs = (int) q_val("SELECT COUNT(*) FROM properties WHERE approval = 'pending'");
+    } catch (Exception $ex) {
+        $pendingSubs = 0; // columns not added yet
+    }
     $nav = [
         'Overview' => [
             ['dashboard', 'dashboard.php', 'bi-speedometer2', 'Dashboard', 0],
@@ -19,6 +24,7 @@ function admin_nav()
             ['documents', 'documents.php', 'bi-folder2-open', 'Documents', 0],
         ],
         'Website' => [
+            ['submissions', 'submissions.php', 'bi-house-add', 'Owner Submissions', $pendingSubs],
             ['sections', 'sections.php', 'bi-layout-text-window', 'Landing Page', 0],
             ['locations', 'locations.php', 'bi-geo-alt', 'Locations', 0],
             ['inquiries', 'inquiries.php', 'bi-envelope', 'Inquiries', $newInq],

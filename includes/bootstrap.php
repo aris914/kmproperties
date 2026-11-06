@@ -4,7 +4,8 @@
  */
 
 define('APP_ROOT', dirname(__DIR__));
-define('APP_VERSION', '1.1.0');
+define('APP_VERSION', '1.2.0');
+define('DB_VERSION', '1.2.0'); // newest sql/update-x.y.z.sql
 
 if (!file_exists(__DIR__ . '/config.php')) {
     $installer = (strpos($_SERVER['SCRIPT_NAME'] ?? '', '/admin/') !== false ? '../' : '') . 'install.php';
@@ -26,6 +27,7 @@ define('SITE_UPLOAD_DIR', APP_ROOT . '/uploads/site');
 define('DOC_DIR', APP_ROOT . '/storage/documents');
 
 require __DIR__ . '/security.php';
+require __DIR__ . '/migrate.php';
 
 if (session_status() === PHP_SESSION_NONE) {
     session_name('kmup_session');
@@ -583,6 +585,27 @@ function property_price_label(array $p)
     return $s;
 }
 
+/** Leaflet (map) CSS and JS tags, plus the map/photo picker script. */
+function map_assets()
+{
+    return [
+        '<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="">',
+        '<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>'
+        . '<script src="' . url('assets/js/map-picker.js?v=' . APP_VERSION) . '"></script>',
+    ];
+}
+
+/** SQL condition for listings the public may see. */
+function public_sql($alias = 'p')
+{
+    return "$alias.approval = 'approved' AND $alias.is_visible = 1";
+}
+
+function amenity_choices()
+{
+    return ['Swimming pool', 'Gym', '24/7 security', 'Parking', 'Balcony', 'City view', 'Function room', 'Playground', 'Pet-friendly', 'Elevator', 'Back-up generator', 'Near MRT/LRT', 'Near mall', 'High-speed internet ready', 'Laundry area', 'Concierge'];
+}
+
 function unit_types()
 {
     return ['Studio', '1 Bedroom', '2 Bedroom', '3 Bedroom', 'Loft', 'Penthouse'];
@@ -670,6 +693,9 @@ function select_options(array $options, $selected, $assoc = false)
     }
     return $html;
 }
+
+/* ---------- Automatic database updates (see includes/migrate.php) ---------- */
+db_migrate();
 
 /* ---------- Security gate for the public website (Admin › Security › "Whole site") ---------- */
 if (strpos((string) ($_SERVER['SCRIPT_NAME'] ?? ''), '/admin/') === false) {

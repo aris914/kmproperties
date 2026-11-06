@@ -69,7 +69,7 @@ foreach ($sections as $s):
     case 'featured_sale':
         $type = $s['section_key'] === 'featured_rent' ? 'rent' : 'sale';
         $limit = max(1, min(24, (int) $s['item_limit']));
-        $props = q_all(listing_select() . " WHERE p.listing_type = ? AND p.status IN ('available','reserved') ORDER BY p.is_featured DESC, p.created_at DESC LIMIT $limit", [$type]);
+        $props = q_all(listing_select() . " WHERE p.listing_type = ? AND p.status IN ('available','reserved') AND " . public_sql() . " ORDER BY p.is_featured DESC, p.created_at DESC LIMIT $limit", [$type]);
         if (!$props) break; ?>
 <section class="section <?= $type === 'sale' ? 'section-alt' : '' ?>">
   <div class="container-xl">
@@ -108,7 +108,7 @@ foreach ($sections as $s):
 
     case 'locations':
         $limit = max(1, (int) $s['item_limit']);
-        $locs = q_all("SELECT l.*, (SELECT COUNT(*) FROM properties p WHERE p.location_id = l.id AND p.status IN ('available','reserved')) AS cnt
+        $locs = q_all("SELECT l.*, (SELECT COUNT(*) FROM properties p WHERE p.location_id = l.id AND p.status IN ('available','reserved') AND " . public_sql() . ") AS cnt
                        FROM locations l WHERE l.is_active = 1 ORDER BY l.sort_order, l.name LIMIT $limit");
         if (!$locs) break; ?>
 <section class="section section-navy">

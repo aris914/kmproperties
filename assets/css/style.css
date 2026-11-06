@@ -246,3 +246,28 @@ a:hover { color: var(--navy); }
 .footer-bottom { border-top: 1px solid rgba(255, 255, 255, .1); color: rgba(255, 255, 255, .55); font-size: .88rem; }
 
 .empty-state { background: var(--cream); border-radius: var(--radius); }
+
+/* List Your Property (1.2.0) */
+.listing-form .lf-step { display: flex; align-items: center; gap: .6rem; font-size: 1.1rem; margin: 2rem 0 1rem; padding-top: 1.4rem; border-top: 1px solid var(--line); }
+.listing-form .lf-step:first-of-type { margin-top: 0; padding-top: 0; border-top: 0; }
+.lf-step span { width: 30px; height: 30px; border-radius: 50%; background: var(--navy); color: var(--gold); display: grid; place-items: center; font-size: .9rem; flex: none; }
+.amen-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: .25rem 1rem; }
+.map-tools { display: flex; flex-wrap: wrap; gap: .5rem; margin-bottom: .6rem; }
+.map-tools .input-group { flex: 1 1 260px; }
+.map-box { height: 360px; border-radius: 14px; overflow: hidden; border: 1px solid var(--line); z-index: 0; }
+.photo-drop { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: .3rem; border: 2px dashed #c9d3dd; border-radius: 14px; padding: 1.6rem; cursor: pointer; color: var(--muted); text-align: center; background: var(--cream); }
+.photo-drop:hover { border-color: var(--teal); color: var(--teal); }
+.photo-drop i { font-size: 2rem; color: var(--teal); }
+.photo-drop input { position: absolute; width: 1px; height: 1px; opacity: 0; }
+.pp-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: .6rem; margin-top: .8rem; }
+.pp-item { position: relative; border-radius: 10px; overflow: hidden; aspect-ratio: 4 / 3; background: var(--navy); }
+.pp-item img { width: 100%; height: 100%; object-fit: cover; }
+.pp-item button { position: absolute; top: 4px; right: 4px; width: 26px; height: 26px; border-radius: 50%; border: 0; background: rgba(0, 0, 0, .65); color: #fff; line-height: 1; font-size: 1.1rem; }
+.pp-item span { position: absolute; left: 4px; bottom: 4px; background: var(--gold); color: var(--navy); font-size: .7rem; font-weight: 600; padding: 0 .45rem; border-radius: 999px; }
+.steps-list { list-style: none; counter-reset: s; padding: 0; margin: 1rem 0 0; }
+.steps-list li { counter-increment: s; position: relative; padding: 0 0 1.1rem 3rem; }
+.steps-list li::before { content: counter(s); position: absolute; left: 0; top: 0; width: 34px; height: 34px; border-radius: 50%; background: var(--gold); color: var(--navy); font-weight: 700; display: grid; place-items: center; }
+.steps-list b { display: block; color: var(--navy); }
+.steps-list span { color: var(--muted); font-size: .95rem; }
+.prop-map { height: 320px; border-radius: 14px; overflow: hidden; z-index: 0; }
+.preview-bar { background: #fff3cd; color: #664d03; border-bottom: 1px solid #ffe69c; padding: .6rem 0; font-size: .92rem; }

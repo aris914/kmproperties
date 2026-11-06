@@ -142,3 +142,69 @@ function tenant_options($selected = null)
     }
     return $html;
 }
+
+/* ---------- Owner submissions & website visibility (1.2.0) ---------- */
+
+/** Approve / reject buttons for a property, depending on its approval state. */
+function review_buttons(array $p, $return)
+{
+    $f = function ($action, $label, $cls, $extra = '') use ($p, $return) {
+        return '<form method="post" action="' . url('admin/property-action.php') . '" class="d-inline">' . csrf_field()
+            . '<input type="hidden" name="id" value="' . (int) $p['id'] . '"><input type="hidden" name="action" value="' . $action . '">'
+            . '<input type="hidden" name="return" value="' . e($return) . '">' . $extra
+            . '<button class="btn btn-sm ' . $cls . '">' . $label . '</button></form>';
+    };
+    if ($p['approval'] === 'pending') {
+        echo $f('approve', '<i class="bi bi-check2-circle me-1"></i>Approve &amp; publish', 'btn-primary', '<input type="hidden" name="publish" value="1">');
+        echo $f('approve', 'Approve, keep hidden', 'btn-outline-primary', '<input type="hidden" name="publish" value="0">');
+        echo '<button type="button" class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#rejectModal" data-id="' . (int) $p['id']
+            . '" data-title="' . e($p['title']) . '" data-return="' . e($return) . '"><i class="bi bi-x-circle me-1"></i>Reject</button>';
+    } elseif ($p['approval'] === 'rejected') {
+        echo $f('approve', '<i class="bi bi-check2-circle me-1"></i>Approve &amp; publish', 'btn-primary', '<input type="hidden" name="publish" value="1">');
+        echo $f('pending', 'Back to waiting', 'btn-light');
+    } else {
+        visibility_button($p, $return);
+    }
+}
+
+/** Show on website / Hide from website toggle. */
+function visibility_button(array $p, $return, $small = true)
+{
+    if ($p['approval'] !== 'approved') {
+        echo '<span class="badge text-bg-warning">' . ($p['approval'] === 'pending' ? 'Waiting for approval' : 'Rejected') . '</span>';
+        return;
+    }
+    $vis = (int) $p['is_visible'] === 1;
+    echo '<form method="post" action="' . url('admin/property-action.php') . '" class="d-inline">' . csrf_field()
+        . '<input type="hidden" name="id" value="' . (int) $p['id'] . '"><input type="hidden" name="action" value="' . ($vis ? 'hide' : 'show') . '">'
+        . '<input type="hidden" name="return" value="' . e($return) . '">'
+        . '<button class="btn ' . ($small ? 'btn-sm ' : '') . ($vis ? 'btn-success' : 'btn-outline-secondary') . '" title="' . ($vis ? 'Shown on the website — click to hide' : 'Hidden from the website — click to show') . '">'
+        . '<i class="bi ' . ($vis ? 'bi-eye' : 'bi-eye-slash') . ' me-1"></i>' . ($vis ? 'Shown' : 'Hidden') . '</button></form>';
+}
+
+/** The dialog that asks for a reason when rejecting. Include once per page. */
+function review_modal()
+{
+    ?>
+<div class="modal fade" id="rejectModal" tabindex="-1" aria-labelledby="rejectTitle" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered"><form method="post" action="<?= url('admin/property-action.php') ?>" class="modal-content">
+    <?= csrf_field() ?><input type="hidden" name="action" value="reject"><input type="hidden" name="id" id="rjId"><input type="hidden" name="return" id="rjReturn">
+    <div class="modal-header"><h2 class="modal-title h5" id="rejectTitle">Reject submission</h2><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button></div>
+    <div class="modal-body">
+      <p class="mb-2" id="rjName"></p>
+      <label class="form-label" for="rjNote">Reason (kept in the history; not sent to the owner)</label>
+      <textarea name="note" id="rjNote" class="form-control" rows="3" maxlength="255" placeholder="e.g. Duplicate listing, incomplete details, could not verify owner"></textarea>
+    </div>
+    <div class="modal-footer"><button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button><button class="btn btn-danger">Reject</button></div>
+  </form></div>
+</div>
+<script>
+document.getElementById('rejectModal').addEventListener('show.bs.modal', function (ev) {
+  var b = ev.relatedTarget;
+  document.getElementById('rjId').value = b.dataset.id;
+  document.getElementById('rjReturn').value = b.dataset.return;
+  document.getElementById('rjName').textContent = b.dataset.title;
+});
+</script>
+    <?php
+}

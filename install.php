@@ -66,6 +66,10 @@ if (!$installed && $pdo && ($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
             if (!empty($_POST['sample']) && !(int) $pdo->query('SELECT COUNT(*) FROM properties')->fetchColumn()) {
                 run_sql_file($pdo, $root . '/sql/sample-data.sql');
             }
+            // the full schema already contains every update: start at the newest database version
+            if (preg_match("/define\('DB_VERSION', '([0-9.]+)'\)/", (string) file_get_contents($root . '/includes/bootstrap.php'), $dv)) {
+                $pdo->prepare('INSERT INTO settings (setting_key, setting_value) VALUES (?, ?) ON DUPLICATE KEY UPDATE setting_value = VALUES(setting_value)')->execute(['db_version', $dv[1]]);
+            }
             $st = $pdo->prepare('INSERT INTO users (name, email, password_hash, role) VALUES (?, ?, ?, ?)');
             $st->execute([$name, $email, password_hash($pass, PASSWORD_DEFAULT), 'admin']);
             $done = true;

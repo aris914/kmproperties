@@ -16,7 +16,7 @@ $perPage = 12;
 $location = $locSlug ? q_one('SELECT * FROM locations WHERE slug = ? AND is_active = 1', [$locSlug]) : null;
 $locations = q_all('SELECT name, slug FROM locations WHERE is_active = 1 ORDER BY sort_order, name');
 
-$where = ["p.status IN ('available','reserved')"];
+$where = ["p.status IN ('available','reserved')", public_sql()];
 $params = [];
 if ($type) { $where[] = 'p.listing_type = ?'; $params[] = $type; }
 if ($unit) { $where[] = 'p.unit_type = ?'; $params[] = $unit; }

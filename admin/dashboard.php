@@ -25,6 +25,9 @@ $recent = history_query('1=1', [], 10);
 
 admin_header('Dashboard', 'dashboard');
 ?>
+<?php $pendingSubs = (int) q_val("SELECT COUNT(*) FROM properties WHERE approval = 'pending'"); if ($pendingSubs): ?>
+<div class="review-bar pending"><i class="bi bi-house-add fs-4"></i><div class="flex-fill"><b><?= $pendingSubs ?> propert<?= $pendingSubs === 1 ? 'y' : 'ies' ?> from owners waiting for approval</b><div class="small">Submitted through List Your Property. They are hidden from the website until approved.</div></div><a href="<?= url('admin/submissions.php') ?>" class="btn btn-sm btn-primary">Review now</a></div>
+<?php endif; ?>
 <div class="row g-3 mb-4">
   <?php
   $cards = [

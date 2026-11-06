@@ -59,5 +59,6 @@ $footLocations = q_all('SELECT name, slug FROM locations WHERE is_active = 1 ORD
 </footer>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script src="<?= url('assets/js/main.js?v=' . APP_VERSION) ?>"></script>
+<?= isset($extraScripts) ? $extraScripts : '' ?>
 </body>
 </html>

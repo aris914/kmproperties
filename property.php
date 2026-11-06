@@ -3,7 +3,13 @@ require __DIR__ . '/includes/bootstrap.php';
 require __DIR__ . '/includes/partials.php';
 
 $slug = get('slug');
-$p = $slug ? q_one(listing_select() . " WHERE p.slug = ? AND p.status <> 'inactive'", [$slug]) : null;
+$p = $slug ? q_one(listing_select() . ' WHERE p.slug = ?', [$slug]) : null;
+// Hidden, pending or inactive listings: only signed-in admins may preview them
+$isPublic = $p && $p['approval'] === 'approved' && (int) $p['is_visible'] === 1 && $p['status'] !== 'inactive';
+$adminPreview = $p && !$isPublic && current_user();
+if ($p && !$isPublic && !$adminPreview) {
+    $p = null;
+}
 if (!$p) {
     http_response_code(404);
     $pageTitle = 'Property not found';
@@ -13,15 +19,15 @@ if (!$p) {
     exit;
 }
 
-// Count one view per session per property
-if (empty($_SESSION['viewed'][$p['id']])) {
+// Count one view per session per property (not for admin previews)
+if (!$adminPreview && empty($_SESSION['viewed'][$p['id']])) {
     $_SESSION['viewed'][$p['id']] = 1;
     q('UPDATE properties SET views = views + 1 WHERE id = ?', [$p['id']]);
 }
 
 $photos = q_all('SELECT * FROM property_photos WHERE property_id = ? ORDER BY is_cover DESC, sort_order, id', [$p['id']]);
 $amenities = lines($p['amenities']);
-$similar = q_all(listing_select() . " WHERE p.listing_type = ? AND p.id <> ? AND p.status IN ('available','reserved')
+$similar = q_all(listing_select() . " WHERE p.listing_type = ? AND p.id <> ? AND p.status IN ('available','reserved') AND " . public_sql() . "
                  ORDER BY (p.location_id <=> ?) DESC, ABS(p.price - ?) LIMIT 3", [$p['listing_type'], $p['id'], $p['location_id'], $p['price']]);
 
 $activeNav = $p['listing_type'];
@@ -29,9 +35,20 @@ $pageTitle = $p['title'];
 $metaDescription = mb_substr(preg_replace('/\s+/', ' ', strip_tags($p['description'] ?: $p['title'])), 0, 160);
 $ogImage = photo_url($photos ? $photos[0]['file'] : null);
 $listLabel = $p['listing_type'] === 'rent' ? 'Condos for Rent' : 'Condos for Sale';
+$hasMap = $p['latitude'] !== null && $p['longitude'] !== null && (int) $p['show_map'] === 1;
+if ($hasMap) {
+    list($extraHead, $extraScripts) = map_assets();
+}
 
 require __DIR__ . '/includes/header.php';
 ?>
+<?php if ($adminPreview): ?>
+<div class="preview-bar"><div class="container-xl d-flex flex-wrap align-items-center gap-2">
+  <i class="bi bi-eye-slash"></i>
+  <span><b>Admin preview</b> — visitors cannot see this listing (<?= e($p['approval'] !== 'approved' ? ($p['approval'] === 'pending' ? 'waiting for approval' : 'rejected') : (!(int) $p['is_visible'] ? 'hidden from the website' : 'status: inactive')) ?>).</span>
+  <a class="ms-auto btn btn-sm btn-dark" href="<?= url('admin/property-view.php?id=' . $p['id']) ?>">Open in admin</a>
+</div></div>
+<?php endif; ?>
 <section class="page-banner page-banner-sm">
   <div class="container-xl">
     <nav aria-label="breadcrumb"><ol class="breadcrumb">
@@ -110,6 +127,14 @@ require __DIR__ . '/includes/header.php';
             <ul class="amenities">
               <?php foreach ($amenities as $a): ?><li><i class="bi bi-check2-circle"></i><?= e($a) ?></li><?php endforeach; ?>
             </ul>
+          </div>
+        <?php endif; ?>
+
+        <?php if ($hasMap): ?>
+          <div class="detail-block">
+            <h2>Location</h2>
+            <div class="prop-map" data-map-view data-lat="<?= e($p['latitude']) ?>" data-lng="<?= e($p['longitude']) ?>"></div>
+            <a class="small d-inline-block mt-2" target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&amp;query=<?= e($p['latitude'] . ',' . $p['longitude']) ?>"><i class="bi bi-box-arrow-up-right me-1"></i>Open in Google Maps</a>
           </div>
         <?php endif; ?>
       </div>

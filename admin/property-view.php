@@ -19,8 +19,28 @@ $jobStats = q_one("SELECT COUNT(*) AS total, SUM(status IN ('open','scheduled','
 $current = q_one("SELECT l.*, t.first_name, t.last_name, t.phone, t.email FROM leases l JOIN tenants t ON t.id = l.tenant_id WHERE l.property_id = ? AND l.status = 'active' ORDER BY l.start_date DESC LIMIT 1", [$id]);
 $cover = property_cover($id);
 
-admin_header($p['title'], 'properties');
+admin_header($p['title'], $p['source'] === 'owner' && $p['approval'] !== 'approved' ? 'submissions' : 'properties');
+$selfOverview = url('admin/property-view.php?id=' . $id . '&tab=' . $tab);
 ?>
+<?php if ($p['approval'] === 'pending'): ?>
+  <div class="review-bar pending">
+    <i class="bi bi-hourglass-split fs-4"></i>
+    <div class="flex-fill"><b>Waiting for approval</b><div class="small">Submitted by the owner <?= fmt_date($p['submitted_at'], 'M j, Y g:i A') ?>. Hidden from the website until approved. Check the details, photos and map pin; edit anything that needs fixing.</div></div>
+    <?php review_buttons($p, $selfOverview); ?>
+  </div>
+<?php elseif ($p['approval'] === 'rejected'): ?>
+  <div class="review-bar rejected">
+    <i class="bi bi-x-octagon fs-4"></i>
+    <div class="flex-fill"><b>Rejected</b><?= $p['review_note'] ? ' — ' . e($p['review_note']) : '' ?><div class="small">Not shown on the website.</div></div>
+    <?php review_buttons($p, $selfOverview); ?>
+  </div>
+<?php elseif (!(int) $p['is_visible']): ?>
+  <div class="review-bar hidden">
+    <i class="bi bi-eye-slash fs-4"></i>
+    <div class="flex-fill"><b>Hidden from the website</b><div class="small">Visitors cannot see this listing. Leases, repairs and documents still work as normal.</div></div>
+    <?php visibility_button($p, $selfOverview); ?>
+  </div>
+<?php endif; ?>
 <div class="record-head">
   <img src="<?= e(photo_url($cover)) ?>" alt="" class="record-img">
   <div class="flex-fill">
@@ -35,6 +55,7 @@ admin_header($p['title'], 'properties');
     <div class="fs-5 fw-semibold text-teal mt-1"><?= money($p['price']) ?><?= $p['listing_type'] === 'rent' ? ' <small class="text-muted fw-normal">/ ' . e($p['price_period'] ?: 'month') . '</small>' : '' ?></div>
   </div>
   <div class="d-flex flex-wrap gap-2 align-self-start">
+    <?php if ($p['approval'] === 'approved') { visibility_button($p, $selfOverview, false); } ?>
     <a href="<?= url('admin/property-edit.php?id=' . $id) ?>" class="btn btn-navy"><i class="bi bi-pencil me-1"></i>Edit</a>
     <?php if ($p['listing_type'] === 'rent'): ?><a href="<?= url('admin/lease-edit.php?property_id=' . $id) ?>" class="btn btn-outline-primary"><i class="bi bi-key me-1"></i>New lease</a><?php endif; ?>
     <a href="<?= url('admin/maintenance-edit.php?property_id=' . $id) ?>" class="btn btn-outline-primary"><i class="bi bi-tools me-1"></i>Log repair</a>
@@ -68,6 +89,17 @@ admin_header($p['title'], 'properties');
       <?php if ($p['description']): ?><hr><div><?= nl2p($p['description']) ?></div><?php endif; ?>
       <?php if ($p['amenities']): ?><hr><div class="d-flex flex-wrap gap-2"><?php foreach (lines($p['amenities']) as $a): ?><span class="badge text-bg-light border"><i class="bi bi-check2 text-teal"></i> <?= e($a) ?></span><?php endforeach; ?></div><?php endif; ?>
     </div></div>
+    <div class="card mb-4">
+      <div class="card-header d-flex justify-content-between"><span><i class="bi bi-pin-map me-1"></i>Map location</span>
+        <?php if ($p['latitude'] !== null): ?><span class="small"><?= (int) $p['show_map'] ? '<span class="text-success">Map shown on website</span>' : '<span class="text-muted">Map hidden on website</span>' ?> · <a target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&amp;query=<?= e($p['latitude'] . ',' . $p['longitude']) ?>">Google Maps</a></span><?php endif; ?></div>
+      <div class="card-body">
+        <?php if ($p['latitude'] !== null): list($mc, $mj) = map_assets(); echo $mc . $mj; ?>
+          <div class="map-box" data-map-view data-lat="<?= e($p['latitude']) ?>" data-lng="<?= e($p['longitude']) ?>"></div>
+        <?php else: ?>
+          <p class="text-muted mb-2">No map pin yet.</p><a href="<?= url('admin/property-edit.php?id=' . $id) ?>#mapCard" class="btn btn-sm btn-light"><i class="bi bi-pin-map me-1"></i>Add a pin</a>
+        <?php endif; ?>
+      </div>
+    </div>
   </div>
   <div class="col-xl-4">
     <?php if ($p['listing_type'] === 'rent'): ?>
@@ -95,7 +127,7 @@ admin_header($p['title'], 'properties');
       </div>
     </div>
     <div class="card mb-4">
-      <div class="card-header">Owner</div>
+      <div class="card-header">Owner<?= $p['source'] === 'owner' ? ' <span class="badge text-bg-light">submitted on website</span>' : '' ?></div>
       <div class="card-body small">
         <div class="fw-semibold"><?= e($p['owner_name'] ?: '—') ?></div>
         <div><?= e($p['owner_phone']) ?></div><div><?= e($p['owner_email']) ?></div>
@@ -212,4 +244,5 @@ admin_header($p['title'], 'properties');
   <?php history_timeline(history_query('h.property_id = ?', [$id], 500), false, true); ?>
 </div></div>
 <?php endif; ?>
+<?php if ($p['approval'] === 'pending') { review_modal(); } ?>
 <?php admin_footer();
