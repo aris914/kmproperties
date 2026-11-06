@@ -18,10 +18,10 @@ $active = null;
 foreach ($leases as $l) {
     if ($l['status'] === 'active') { $active = $l; break; }
 }
-$totalPaid = (float) q_val('SELECT COALESCE(SUM(pa.amount),0) FROM payments pa JOIN leases l ON l.id = pa.lease_id WHERE l.tenant_id = ?', [$id]);
+$totalPaid = (float) q_val("SELECT COALESCE(SUM(CASE WHEN pa.payment_type = 'deposit_refund' THEN -pa.amount WHEN pa.payment_type = 'deposit_applied' THEN 0 ELSE pa.amount END),0) FROM payments pa JOIN leases l ON l.id = pa.lease_id WHERE l.tenant_id = ?", [$id]);
 $docCount = (int) q_val("SELECT COUNT(*) FROM documents WHERE entity_type = 'tenant' AND entity_id = ?", [$id]);
 $jobCount = (int) q_val('SELECT COUNT(*) FROM maintenance WHERE tenant_id = ?', [$id]);
-$payCount = (int) q_val('SELECT COUNT(*) FROM payments pa JOIN leases l ON l.id = pa.lease_id WHERE l.tenant_id = ?', [$id]);
+$payCount = (int) q_val('SELECT COUNT(*) FROM payments pa JOIN leases l ON l.id = pa.lease_id WHERE l.tenant_id = ?", [$id]);
 
 admin_header(tenant_name($t), 'tenants');
 ?>
@@ -131,7 +131,7 @@ admin_header(tenant_name($t), 'tenants');
       <tr>
         <td class="small"><?= fmt_date($pa['paid_on']) ?></td>
         <td class="small"><a href="<?= url('admin/lease-view.php?id=' . $pa['lease_id']) ?>"><?= e($pa['title']) ?></a></td>
-        <td class="small"><?= e(ucfirst($pa['payment_type'])) ?><?= $pa['period_label'] ? ' · ' . e($pa['period_label']) : '' ?></td>
+        <td class="small"><?= e(payment_types()[$pa['payment_type']] ?? $pa['payment_type']) ?><?= $pa['period_label'] ? ' · ' . e($pa['period_label']) : '' ?></td>
         <td class="small"><?= e($pa['method']) ?> <span class="text-muted"><?= e($pa['reference']) ?></span></td>
         <td class="text-end"><?= money($pa['amount'], 2) ?></td>
       </tr>

@@ -8,7 +8,7 @@ $AREAS = [
     'session' => 'Sign-in / sign-out', 'properties' => 'Properties', 'photos' => 'Property photos', 'tenants' => 'Tenants',
     'leases' => 'Leases', 'payments' => 'Payments', 'maintenance' => 'Repairs & maintenance', 'documents' => 'Documents',
     'history' => 'History notes', 'inquiries' => 'Inquiries', 'sections' => 'Landing page', 'locations' => 'Locations',
-    'settings' => 'Site settings', 'theme' => 'Theme & layout', 'users' => 'Users', 'security' => 'Security', 'audit_log' => 'Audit log', 'test_data' => 'Test data',
+    'settings' => 'Site settings', 'theme' => 'Theme & layout', 'users' => 'Users', 'security' => 'Security', 'audit_log' => 'Audit log', 'test_data' => 'Test data', 'reports' => 'Reports',
 ];
 $ACTIONS = [
     'insert' => 'Added', 'update' => 'Changed', 'delete' => 'Deleted', 'sign_in' => 'Signed in', 'sign_out' => 'Signed out',

@@ -321,7 +321,7 @@ function td_populate(array $opt)
         $data = array_merge([
             'property_id' => $p['id'], 'tenant_id' => $t['id'], 'start_date' => $start, 'end_date' => $end,
             'monthly_rent' => $rent, 'deposit' => $rent * 2, 'advance' => $rent, 'due_day' => min(28, (int) date('j', strtotime($start))),
-            'status' => $status, 'notes' => 'Test lease',
+            'status' => $status, 'notes' => 'Test lease', 'grace_days' => 3,
         ], $extra);
         $lid = db_insert('leases', $data);
         $out['leases']++;
@@ -330,7 +330,8 @@ function td_populate(array $opt)
             'Period: ' . fmt_date($start) . ' – ' . fmt_date($end) . "\nMonthly rent: " . money($rent, 2), $status === 'upcoming' ? td_day(-3) : $start);
         if ($status !== 'upcoming') {
             foreach ([['deposit', $rent * 2], ['advance', $rent]] as $pp) {
-                db_insert('payments', ['lease_id' => $lid, 'amount' => $pp[1], 'paid_on' => $start, 'payment_type' => $pp[0], 'method' => 'Bank transfer', 'reference' => 'TD' . mt_rand(100000, 999999)]);
+                db_insert('payments', ['lease_id' => $lid, 'amount' => $pp[1], 'paid_on' => $start, 'payment_type' => $pp[0], 'method' => 'Bank transfer', 'reference' => 'TD' . mt_rand(100000, 999999),
+                    'period_month' => $pp[0] === 'advance' ? month_first($start) : null, 'period_label' => $pp[0] === 'advance' ? month_label(month_first($start), true) : null]);
                 $out['payments']++;
             }
             log_history($p['id'], $t['id'], 'payment', 'Payment received: ' . money($rent * 3, 2) . ' (deposit and advance) from ' . $name, null, $start);
@@ -340,7 +341,7 @@ function td_populate(array $opt)
                     break;
                 }
                 $method = td_pick($methods);
-                db_insert('payments', ['lease_id' => $lid, 'amount' => $rent, 'paid_on' => $on, 'payment_type' => 'rent', 'period_label' => date('M Y', strtotime($on)), 'method' => $method, 'reference' => $method === 'Cash' ? null : 'TD' . mt_rand(100000, 999999)]);
+                db_insert('payments', ['lease_id' => $lid, 'amount' => $rent, 'paid_on' => $on, 'payment_type' => 'rent', 'period_month' => month_first($on), 'period_label' => date('M Y', strtotime($on)), 'method' => $method, 'reference' => $method === 'Cash' ? null : 'TD' . mt_rand(100000, 999999)]);
                 $out['payments']++;
                 log_history($p['id'], $t['id'], 'payment', 'Payment received: ' . money($rent, 2) . ' (rent, ' . date('M Y', strtotime($on)) . ') from ' . $name, $method, $on);
             }
@@ -391,6 +392,7 @@ function td_populate(array $opt)
                 $s = td_month_add(td_day(-15), -14);
                 $e = td_month_add($s, 12);
                 $lid = $addLease($p, $old, $s, date('Y-m-d', strtotime($e . ' -1 day')), 'ended', 11, ['move_out_date' => td_day(-45), 'end_reason' => 'Moved to a bigger unit', 'deposit_refunded' => $p['price'] * 2 - 3500]);
+                db_insert('payments', ['lease_id' => $lid, 'amount' => $p['price'] * 2 - 3500, 'paid_on' => td_day(-40), 'payment_type' => 'deposit_refund', 'method' => 'Bank transfer', 'notes' => 'Refund at move-out (PHP 3,500 kept for wall repair)']);
                 q("UPDATE tenants SET status = 'former' WHERE id = ?", [$old['id']]);
                 log_history($p['id'], $old['id'], 'lease_end', 'Lease ended: ' . $old['first_name'] . ' ' . $old['last_name'] . ' moved out of ' . $p['title'], "Reason: Moved to a bigger unit\nDeposit refunded: " . money($p['price'] * 2 - 3500, 2) . ' (PHP 3,500 kept for wall repair)', td_day(-45));
                 $addJob($p, $old, 'Repaint walls after move-out', 'maintenance', 'completed', 'normal', 42, 3500, 'Juan Painting Services', 'Walls / paint');

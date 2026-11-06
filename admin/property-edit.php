@@ -44,6 +44,9 @@ if (is_post()) {
         'address' => nn(post('address')),
         'price' => num(post('price')),
         'price_period' => post('listing_type') === 'sale' ? null : (nn(post('price_period')) ?: 'month'),
+        'deposit_months' => max(0, min(12, round(num(post('deposit_months')) * 2) / 2)),
+        'advance_months' => max(0, min(12, round(num(post('advance_months')) * 2) / 2)),
+        'due_day' => (int) post('due_day') >= 1 && (int) post('due_day') <= 31 ? (int) post('due_day') : null,
         'bedrooms' => max(0, min(20, (int) post('bedrooms'))),
         'bathrooms' => max(0, min(20, (int) post('bathrooms'))),
         'floor_area' => num(post('floor_area')) ?: null,
@@ -148,6 +151,14 @@ admin_header($p && !empty($p['id']) ? 'Edit property' : 'Add property', 'propert
           </div>
           <div class="col-md-4"><label class="form-label">Price (<?= e(setting('currency', '₱')) ?>)</label><input name="price" class="form-control" inputmode="decimal" value="<?= $v('price') !== '' ? e((float) $v('price')) : '' ?>"></div>
           <div class="col-md-4 rent-only"><label class="form-label">Per</label><select name="price_period" class="form-select"><?= select_options(['month' => 'Month', 'year' => 'Year', 'night' => 'Night', 'week' => 'Week'], $v('price_period', 'month'), true) ?></select></div>
+          <div class="col-12 rent-only"><div class="upload-box">
+            <div class="fw-semibold small mb-2"><i class="bi bi-safe me-1"></i>Rental terms — used for new leases and shown on the website</div>
+            <div class="row g-2">
+              <div class="col-md-4"><label class="form-label">Security deposit</label><div class="input-group"><input type="number" step="0.5" min="0" max="12" name="deposit_months" class="form-control" value="<?= e((float) $v('deposit_months', 2)) ?>"><span class="input-group-text">month(s)</span></div></div>
+              <div class="col-md-4"><label class="form-label">Advance rent</label><div class="input-group"><input type="number" step="0.5" min="0" max="12" name="advance_months" class="form-control" value="<?= e((float) $v('advance_months', 1)) ?>"><span class="input-group-text">month(s)</span></div></div>
+              <div class="col-md-4"><label class="form-label">Rent due every</label><div class="input-group"><input type="number" min="1" max="31" name="due_day" class="form-control" value="<?= e($v('due_day')) ?>" placeholder="lease start day"><span class="input-group-text">of the month</span></div></div>
+            </div>
+          </div></div>
           <div class="col-md-4"><label class="form-label">Status</label><select name="status" class="form-select"><?= select_options($statuses, $v('status', 'available'), true) ?></select></div>
           <div class="col-md-4"><label class="form-label">Property type</label><select name="property_type" class="form-select"><?= select_options(property_types(), $v('property_type', 'Condominium')) ?></select></div>
           <div class="col-md-4"><label class="form-label">Unit type</label><select name="unit_type" class="form-select"><option value="">—</option><?= select_options(unit_types(), $v('unit_type')) ?></select></div>

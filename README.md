@@ -15,7 +15,9 @@ PHP / MySQL website for condominium rentals and property sales in Metro Manila, 
 - **Landing page** — edit, hide/show and reorder each homepage section and its items (icons, services, stats, testimonials), upload section images
 - **Properties** — rent or sale listings, status (available / reserved / rented / sold / inactive), featured flag, owner details, multiple photos (cover, captions, order; auto-resized), private documents
 - **Tenants** — profile, IDs, emergency contact, status, documents
-- **Leases & payments** — start/renew/end leases, deposits, payment records, rent statement; property and tenant statuses update automatically
+- **Leases & payments** — start/renew/end leases with a monthly due date and grace days, deposit and advance tracking, payments per month and a month-by-month rent ledger; property and tenant statuses update automatically
+- **Rent collection** — paid / unpaid / overdue rent for any month, earlier arrears, record payments and send reminders
+- **Reports** — collection by month, unpaid rent aging, income & expenses, payments register, deposits, occupancy, lease expiry, repair costs (CSV and print)
 - **Repairs & maintenance** — log repairs, maintenance, inspections and renovations per property (priority, status, contractor, cost, who pays) with quotes/receipts/before-after photos
 - **History** — an automatic timeline for every property and every tenant (listing changes, leases, move-outs, payments, repairs, documents) plus manual notes. Each property also has a *Tenancy history* tab and a *Repairs & maintenance* log with total spent.
 - **Documents** — upload PDF/Word/Excel/images to properties, tenants, leases and repair jobs. Stored outside public access and served only to logged-in admins.

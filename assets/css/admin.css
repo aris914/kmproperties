@@ -282,3 +282,24 @@ body.lay-float .lnav, body.lay-float .lmain { background: var(--card); box-shado
 .doc-mini .id-thumb { width: 64px; flex: none; aspect-ratio: 4 / 3; }
 .doc-mini .id-thumb.is-file span { display: none; }
 .doc-mini .id-thumb.is-file i { font-size: 1.4rem; }
+
+/* Print: reports and rent collection (1.5.0) */
+@media print {
+  body.admin { background: #fff !important; }
+  .adm-head, .lnav, .adm-foot, .no-print, .btn, .sticky-save, .nav-tabs, form.no-print, .sidebar-backdrop { display: none !important; }
+  body.navl .lay, body.lay-side .lay { display: block !important; }
+  .adm-main { max-width: none; margin: 0; padding: 0; }
+  .adm-card, body.navl .lmain, body.lay-float .lmain { box-shadow: none !important; padding: 0 !important; background: #fff !important; }
+  .card, .bkbox, .stat-card { break-inside: avoid; border-color: #ccc !important; }
+  .table-danger > * { background: #fde8e8 !important; }
+  a { color: inherit !important; text-decoration: none !important; }
+  .print-title { display: block !important; }
+}
+.print-title { display: none; }
+.report-nav .list-group-item.active { background: var(--primary); border-color: var(--primary); color: var(--onp); }
+.chart-bars { display: flex; align-items: flex-end; gap: 6px; height: 200px; padding: 8px 4px 0; border-bottom: 1px solid var(--line); }
+.chart-bars .cb { flex: 1; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; min-width: 0; height: 100%; position: relative; }
+.chart-bars .cb-due { width: 100%; background: color-mix(in srgb, var(--neutral) 30%, transparent); border-radius: 6px 6px 0 0; position: relative; }
+.chart-bars .cb-paid { position: absolute; left: 0; right: 0; bottom: 0; background: var(--accent); border-radius: 6px 6px 0 0; }
+.chart-labels { display: flex; gap: 6px; padding: 4px; }
+.chart-labels span { flex: 1; text-align: center; font-size: .7rem; color: var(--muted); min-width: 0; overflow: hidden; }

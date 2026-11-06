@@ -1,5 +1,15 @@
 # Changelog
 
+## 1.5.0 — 2026-11-06
+- **Rent Collection** (new menu item, with a badge for tenants who are overdue): pick a month and see every lease with its due date, rent, paid, balance and status (Paid / Due / Overdue / Upcoming), totals and collection rate, plus all unpaid rent from earlier months. "Record payment" opens the lease with the month and balance filled in; "Send reminder" opens a text message, Viber or email with a ready-made reminder (or copies it). CSV and print.
+- **Monthly due date**: each lease has "Rent is due every [day] of the month" and a grace period (days before rent counts as overdue). Each property can set a default due day for new leases.
+- **Rent ledger on every lease**: a month-by-month schedule with due date, paid, balance and status, a "Pay" button on unpaid months, and totals (due so far, paid, balance, months overdue, next due).
+- **Payments belong to a month**: pick the month (or pay several months at once — the amount is split). New payment types: deposit applied to rent, deposit refund. Existing rent payments were assigned to the month they were paid in.
+- **Deposit & advance per property and per lease**: properties have deposit and advance in months (shown on the website as "1 month advance · 2 months deposit") which fill in new leases. Leases track deposit required / received / applied / refunded / held, and advance required / received; the advance pays the first or the last month(s). New leases can record the deposit and advance as received. Ending a lease can use the deposit for unpaid rent first and records the refund.
+- **Reports** (new menu item): rent collection by month (with chart), unpaid rent aging, income & expenses by property, payments register, deposits & advances, occupancy & rent roll, lease expiry, repair costs — each with filters, totals, CSV download and print.
+- Dashboard: this month's rent collected vs due and overdue rent. Leases list shows each lease's balance.
+- Database: applied automatically after the deploy.
+
 ## 1.4.0 — 2026-11-06
 - **Tenant ID photos and documents on the tenant form** (Add / Edit tenant):
   - New **Valid ID** card: ID type, number, **expiry date**, and **Front** and **Back** photo slots. "Take photo" opens the phone camera; "Upload" takes an image or PDF. Photos are made smaller before upload, preview right away, and a new photo replaces the old one on save. Remove buttons per side.

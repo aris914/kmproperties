@@ -7,6 +7,18 @@ function admin_nav()
     $isAdmin = $u && $u['role'] === 'admin';
     $newInq = (int) q_val("SELECT COUNT(*) FROM inquiries WHERE status = 'new'");
     $openJobs = (int) q_val("SELECT COUNT(*) FROM maintenance WHERE status IN ('open','scheduled','in_progress')");
+    // tenants with overdue rent (cached for 5 minutes per session)
+    if (empty($_SESSION['overdue_cache']) || $_SESSION['overdue_cache'][0] < time() - 300) {
+        $n = 0;
+        try {
+            foreach (rent_arrears() as $a) {
+                $n += $a['totals']['overdue'] > 0 ? 1 : 0;
+            }
+        } catch (Exception $ex) {
+        }
+        $_SESSION['overdue_cache'] = [time(), $n];
+    }
+    $overdueTenants = (int) $_SESSION['overdue_cache'][1];
     try {
         $pendingSubs = (int) q_val("SELECT COUNT(*) FROM properties WHERE approval = 'pending'");
     } catch (Exception $ex) {
@@ -15,11 +27,13 @@ function admin_nav()
     $nav = [
         'Overview' => [
             ['dashboard', 'dashboard.php', 'bi-speedometer2', 'Dashboard', 0],
+            ['reports', 'reports.php', 'bi-graph-up', 'Reports', 0],
         ],
         'Management' => [
             ['properties', 'properties.php', 'bi-buildings', 'Properties', 0],
             ['tenants', 'tenants.php', 'bi-people', 'Tenants', 0],
             ['leases', 'leases.php', 'bi-file-earmark-text', 'Leases & Payments', 0],
+            ['collection', 'collection.php', 'bi-cash-stack', 'Rent Collection', $overdueTenants],
             ['maintenance', 'maintenance.php', 'bi-tools', 'Repairs & Maintenance', $openJobs],
             ['documents', 'documents.php', 'bi-folder2-open', 'Documents', 0],
         ],

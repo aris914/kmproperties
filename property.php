@@ -69,7 +69,8 @@ require __DIR__ . '/includes/header.php';
         <h1 class="detail-title mt-2"><?= e($p['title']) ?></h1>
         <div class="text-muted"><i class="bi bi-geo-alt text-gold"></i> <?= e(implode(', ', array_filter([$p['building'], $p['address'] ?: $p['location_name']]))) ?></div>
       </div>
-      <div class="detail-price"><?= property_price_label($p) ?></div>
+      <div class="text-lg-end"><div class="detail-price"><?= property_price_label($p) ?></div>
+        <?php if ($p['listing_type'] === 'rent' && ((float) $p['deposit_months'] > 0 || (float) $p['advance_months'] > 0)): ?><div class="small text-muted"><?= e(rtrim(rtrim(number_format((float) $p['advance_months'], 1), '0'), '.')) ?> month advance · <?= e(rtrim(rtrim(number_format((float) $p['deposit_months'], 1), '0'), '.')) ?> month<?= (float) $p['deposit_months'] == 1 ? '' : 's' ?> deposit</div><?php endif; ?></div>
     </div>
 
     <!-- Gallery -->
@@ -113,6 +114,7 @@ require __DIR__ . '/includes/header.php';
             $facts = [
                 'Listing ID' => $p['code'], 'Property type' => $p['property_type'], 'Unit type' => $p['unit_type'],
                 'Building' => $p['building'], 'Floor' => $p['floor_level'], 'Location' => $p['location_name'],
+                'Move-in' => $p['listing_type'] === 'rent' ? rtrim(rtrim(number_format((float) $p['advance_months'], 1), '0'), '.') . ' month advance, ' . rtrim(rtrim(number_format((float) $p['deposit_months'], 1), '0'), '.') . ' month(s) deposit' : '',
                 'Furnishing' => $p['furnishing'], 'Floor area' => $p['floor_area'] ? rtrim(rtrim($p['floor_area'], '0'), '.') . ' sqm' : '',
             ];
             foreach ($facts as $k => $v): if ($v): ?>

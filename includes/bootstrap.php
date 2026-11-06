@@ -4,8 +4,8 @@
  */
 
 define('APP_ROOT', dirname(__DIR__));
-define('APP_VERSION', '1.4.0');
-define('DB_VERSION', '1.4.0'); // newest sql/update-x.y.z.sql
+define('APP_VERSION', '1.5.0');
+define('DB_VERSION', '1.5.0'); // newest sql/update-x.y.z.sql
 
 if (!file_exists(__DIR__ . '/config.php')) {
     $installer = (strpos($_SERVER['SCRIPT_NAME'] ?? '', '/admin/') !== false ? '../' : '') . 'install.php';
@@ -29,6 +29,7 @@ define('DOC_DIR', APP_ROOT . '/storage/documents');
 require __DIR__ . '/security.php';
 require __DIR__ . '/migrate.php';
 require __DIR__ . '/theme.php';
+require __DIR__ . '/rent.php';
 
 if (session_status() === PHP_SESSION_NONE) {
     session_name('kmup_session');

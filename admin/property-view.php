@@ -80,6 +80,10 @@ $selfOverview = url('admin/property-view.php?id=' . $id . '&tab=' . $tab);
             'Property type' => $p['property_type'], 'Unit type' => $p['unit_type'], 'Bedrooms' => $p['bedrooms'] ? $p['bedrooms'] : 'Studio',
             'Bathrooms' => $p['bathrooms'], 'Floor area' => $p['floor_area'] ? (float) $p['floor_area'] . ' sqm' : '—', 'Floor' => $p['floor_level'] ?: '—',
             'Parking' => $p['parking'], 'Furnishing' => $p['furnishing'], 'Website views' => $p['views'],
+        ] + ($p['listing_type'] === 'rent' ? [
+            'Deposit' => (float) $p['deposit_months'] . ' month(s) · ' . money($p['price'] * $p['deposit_months']), 'Advance' => (float) $p['advance_months'] . ' month(s) · ' . money($p['price'] * $p['advance_months']),
+            'Rent due' => $p['due_day'] ? 'every ' . (int) $p['due_day'] . ordinal_suffix($p['due_day']) : 'on the lease start day',
+        ] : []) + [
             'Added' => fmt_date($p['created_at']), 'Last updated' => fmt_date($p['updated_at']),
         ];
         foreach ($facts as $k => $val): ?>

@@ -47,11 +47,30 @@ admin_header('Dashboard', 'dashboard');
   <?php endforeach; ?>
 </div>
 
+<?php
+// This month's rent: due vs collected, and everything overdue
+$cm = month_first(date('Y-m-d'));
+$cmDue = $cmPaid = 0;
+$cmLeases = leases_for_month($cm);
+$cmMap = rent_paid_map(array_column($cmLeases, 'id'));
+foreach ($cmLeases as $cl) {
+    foreach (rent_schedule($cl, $cmMap[$cl['id']] ?? [], $cm) as $row) {
+        if ($row['period'] === $cm) { $cmDue += $row['due']; $cmPaid += $row['paid']; }
+    }
+}
+$arr = rent_arrears();
+$overdueAmt = array_sum(array_map(function ($a) { return $a['totals']['overdue']; }, $arr));
+$overdueN = count(array_filter($arr, function ($a) { return $a['totals']['overdue'] > 0; }));
+$cmRate = $cmDue > 0 ? round($cmPaid / $cmDue * 100) : 0;
+?>
 <div class="row g-3 mb-4">
-  <div class="col-md-4"><div class="card card-body"><small class="text-muted">Collected this month</small><div class="fs-4 fw-semibold text-teal"><?= money($monthPaid, 2) ?></div></div></div>
-  <div class="col-md-4"><div class="card card-body"><small class="text-muted">Monthly rent roll (active leases)</small><div class="fs-4 fw-semibold"><?= money($rentRoll, 2) ?></div></div></div>
-  <div class="col-md-4"><div class="card card-body"><small class="text-muted">Repair costs this month</small><div class="fs-4 fw-semibold text-danger"><?= money($monthMaint, 2) ?></div></div></div>
+  <div class="col-md-6 col-xl-3"><a href="<?= url('admin/collection.php') ?>" class="card card-body text-decoration-none h-100"><small class="text-muted"><?= e(month_label($cm)) ?> rent collected</small><div class="fs-4 fw-semibold text-teal"><?= money($cmPaid) ?> <small class="fs-6 text-muted fw-normal">of <?= money($cmDue) ?></small></div>
+    <div class="progress mt-2" style="height:6px"><div class="progress-bar" style="width:<?= $cmRate ?>%;background:var(--accent)"></div></div></a></div>
+  <div class="col-md-6 col-xl-3"><a href="<?= url('admin/collection.php?f=unpaid') ?>" class="card card-body text-decoration-none h-100"><small class="text-muted">Overdue rent</small><div class="fs-4 fw-semibold <?= $overdueAmt > 0 ? 'text-danger' : 'text-teal' ?>"><?= money($overdueAmt) ?></div><small class="text-muted"><?= $overdueN ?> tenant<?= $overdueN === 1 ? '' : 's' ?> overdue</small></a></div>
+  <div class="col-md-6 col-xl-3"><div class="card card-body h-100"><small class="text-muted">Monthly rent roll (active leases)</small><div class="fs-4 fw-semibold"><?= money($rentRoll, 2) ?></div><small class="text-muted"><?= money($monthPaid) ?> received this month (all payments)</small></div></div>
+  <div class="col-md-6 col-xl-3"><a href="<?= url('admin/reports.php?r=maintenance&from=' . date('Y-m-01')) ?>" class="card card-body text-decoration-none h-100"><small class="text-muted">Repair costs this month</small><div class="fs-4 fw-semibold text-danger"><?= money($monthMaint, 2) ?></div></a></div>
 </div>
+
 
 <div class="row g-4">
   <div class="col-xl-6">
