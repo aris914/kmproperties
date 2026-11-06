@@ -102,7 +102,7 @@ admin_header('Site Settings', 'settings');
         <div class="card-header">Logo</div>
         <div class="card-body">
           <p class="small text-muted">Shown on the dark-blue header and footer. Use a PNG with a dark or transparent background, about 480 × 200 px.</p>
-          <div class="logo-preview mb-3"><img src="<?= e(setting('logo_dark') ? site_image_url(setting('logo_dark')) : url('assets/img/logo-dark.png')) ?>" alt=""></div>
+          <div class="logo-preview mb-3"><img src="<?= e(setting('logo_dark') ? site_image_url(setting('logo_dark')) : url('assets/img/logo-dark.png?v=' . APP_VERSION)) ?>" alt=""></div>
           <input type="file" name="logo_dark" class="form-control" accept="image/png,image/webp,image/jpeg">
           <?php if (setting('logo_dark')): ?><div class="form-check mt-2"><input class="form-check-input" type="checkbox" name="reset_logo_dark" value="1" id="rstLogo"><label class="form-check-label small" for="rstLogo">Go back to the original logo</label></div><?php endif; ?>
         </div>

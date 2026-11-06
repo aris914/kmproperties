@@ -73,7 +73,7 @@ function admin_header($title, $active = '')
 <script>(function(){var b=document.body,l=b.dataset.layout,v=null;try{v=localStorage.getItem("kmup_nav_"+l)}catch(e){}if(b.classList.contains("navl")&&(v===null?l==="rail":v==="1"))b.classList.add("navc")})();</script>
 <header class="adm-head">
   <button class="navtog" type="button" onclick="navToggle()" aria-label="Menu"><i class="bi bi-list"></i></button>
-  <a class="adm-logo" href="<?= url('admin/dashboard.php') ?>" title="Dashboard"><img src="<?= e(setting('logo_dark') ? site_image_url(setting('logo_dark')) : url('assets/img/logo-dark.png')) ?>" alt="<?= e(setting('site_name', 'K&M Urban Properties')) ?>"></a>
+  <a class="adm-logo" href="<?= url('admin/dashboard.php') ?>" title="Dashboard"><img src="<?= e(setting('logo_dark') ? site_image_url(setting('logo_dark')) : url('assets/img/logo-dark.png?v=' . APP_VERSION)) ?>" alt="<?= e(setting('site_name', 'K&M Urban Properties')) ?>"></a>
   <span class="hright">
     <span class="clk d-none d-md-inline" id="clk"></span>
     <button type="button" class="hbtn" id="modeBtn" onclick="cycleMode()" title="Light / dark mode"><i class="bi bi-circle-half"></i></button>

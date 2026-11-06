@@ -1,5 +1,8 @@
 # Changelog
 
+## 1.3.1 — 2026-11-06
+- Fix: browsers kept showing the old logo with a navy box after 1.3.0; the logo now reloads with each version. No database update.
+
 ## 1.3.0 — 2026-11-06
 - **Theme colours on the public website**: Admin › Theme & Layout now also colours the website (header, hero, buttons, prices, badges, footer). Switch "Use these colours on the website" off to keep the original K&M navy, teal and gold. Text on highlight buttons switches between dark and light automatically. The white logo now has a transparent background so it fits any header colour.
 - **Admin › Test Data** (administrators only): add made-up records for a full workflow — properties for rent and sale with generated photos and map pins, tenants, leases (re-let unit with a former tenant, lease ending soon, upcoming lease, rent behind), payments, repairs in every status with costs and receipts, sample PDF documents, owner submissions (waiting and rejected), inquiries and history. Shows totals vs test records, and clears only test data or, after typing DELETE, all records. Test records show a TEST badge and codes starting with TEST-.

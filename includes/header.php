@@ -5,7 +5,7 @@ $pageTitle = isset($pageTitle) && $pageTitle ? $pageTitle . ' | ' . $siteName : 
 $metaDescription = isset($metaDescription) ? $metaDescription : setting('meta_description');
 $activeNav = isset($activeNav) ? $activeNav : '';
 $navLocations = q_all('SELECT name, slug FROM locations WHERE is_active = 1 ORDER BY sort_order, name');
-$logoDark = setting('logo_dark') ? site_image_url(setting('logo_dark')) : url('assets/img/logo-dark.png');
+$logoDark = setting('logo_dark') ? site_image_url(setting('logo_dark')) : url('assets/img/logo-dark.png?v=' . APP_VERSION);
 $phone = setting('phone');
 $ogImage = isset($ogImage) ? $ogImage : url('assets/img/hero.jpg');
 ?><!doctype html>

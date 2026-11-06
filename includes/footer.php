@@ -1,6 +1,6 @@
 <?php
 $siteName = setting('site_name', 'K&M Urban Properties');
-$logoDark = setting('logo_dark') ? site_image_url(setting('logo_dark')) : url('assets/img/logo-dark.png');
+$logoDark = setting('logo_dark') ? site_image_url(setting('logo_dark')) : url('assets/img/logo-dark.png?v=' . APP_VERSION);
 $socials = [
     'facebook' => 'bi-facebook', 'instagram' => 'bi-instagram', 'tiktok' => 'bi-tiktok',
 ];

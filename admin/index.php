@@ -59,7 +59,7 @@ if (is_post()) {
 <?= theme_head() ?>
 </head>
 <body class="login-page">
-  <header class="adm-head"><a class="adm-logo" href="<?= url('index.php') ?>" title="Back to website"><img src="<?= e(setting('logo_dark') ? site_image_url(setting('logo_dark')) : url('assets/img/logo-dark.png')) ?>" alt="<?= e(setting('site_name', 'K&M Urban Properties')) ?>"></a></header>
+  <header class="adm-head"><a class="adm-logo" href="<?= url('index.php') ?>" title="Back to website"><img src="<?= e(setting('logo_dark') ? site_image_url(setting('logo_dark')) : url('assets/img/logo-dark.png?v=' . APP_VERSION)) ?>" alt="<?= e(setting('site_name', 'K&M Urban Properties')) ?>"></a></header>
   <div class="login-wrap">
     <div class="login-card">
       <h1>Sign in</h1>
