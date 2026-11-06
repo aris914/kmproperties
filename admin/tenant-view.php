@@ -21,7 +21,7 @@ foreach ($leases as $l) {
 $totalPaid = (float) q_val("SELECT COALESCE(SUM(CASE WHEN pa.payment_type = 'deposit_refund' THEN -pa.amount WHEN pa.payment_type = 'deposit_applied' THEN 0 ELSE pa.amount END),0) FROM payments pa JOIN leases l ON l.id = pa.lease_id WHERE l.tenant_id = ?", [$id]);
 $docCount = (int) q_val("SELECT COUNT(*) FROM documents WHERE entity_type = 'tenant' AND entity_id = ?", [$id]);
 $jobCount = (int) q_val('SELECT COUNT(*) FROM maintenance WHERE tenant_id = ?', [$id]);
-$payCount = (int) q_val('SELECT COUNT(*) FROM payments pa JOIN leases l ON l.id = pa.lease_id WHERE l.tenant_id = ?", [$id]);
+$payCount = (int) q_val('SELECT COUNT(*) FROM payments pa JOIN leases l ON l.id = pa.lease_id WHERE l.tenant_id = ?', [$id]);
 
 admin_header(tenant_name($t), 'tenants');
 ?>
