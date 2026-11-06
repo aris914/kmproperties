@@ -4,7 +4,7 @@
  */
 
 define('APP_ROOT', dirname(__DIR__));
-define('APP_VERSION', '1.0.0');
+define('APP_VERSION', '1.1.0');
 
 if (!file_exists(__DIR__ . '/config.php')) {
     $installer = (strpos($_SERVER['SCRIPT_NAME'] ?? '', '/admin/') !== false ? '../' : '') . 'install.php';
@@ -24,6 +24,8 @@ if (defined('DEBUG') && DEBUG) {
 define('PHOTO_DIR', APP_ROOT . '/uploads/photos');
 define('SITE_UPLOAD_DIR', APP_ROOT . '/uploads/site');
 define('DOC_DIR', APP_ROOT . '/storage/documents');
+
+require __DIR__ . '/security.php';
 
 if (session_status() === PHP_SESSION_NONE) {
     session_name('kmup_session');
@@ -316,13 +318,28 @@ function flashes_html()
 
 /* ---------- Auth ---------- */
 
-function current_user()
+/**
+ * The signed-in user, or null. A session ends when the user is disabled, their password
+ * changed (other sessions), or an administrator disconnected it.
+ */
+function current_user($reload = false)
 {
     static $user = false;
-    if ($user === false) {
+    if ($user === false || $reload) {
         $user = null;
         if (!empty($_SESSION['user_id'])) {
-            $user = q_one('SELECT id, name, email, role FROM users WHERE id = ? AND is_active = 1', [$_SESSION['user_id']]);
+            $row = q_one('SELECT id, name, email, role, password_hash FROM users WHERE id = ? AND is_active = 1', [$_SESSION['user_id']]);
+            if (!$row || pw_version($row['password_hash']) !== ($_SESSION['pwv'] ?? '')) {
+                session_end_row();
+                unset($_SESSION['user_id'], $_SESSION['pwv']);
+            } elseif (session_was_kicked()) {
+                session_end_row();
+                unset($_SESSION['user_id'], $_SESSION['pwv']);
+                $_SESSION['kicked'] = 1;
+            } else {
+                unset($row['password_hash']);
+                $user = $row;
+            }
         }
     }
     return $user;
@@ -331,9 +348,14 @@ function current_user()
 function require_admin($role = null)
 {
     $u = current_user();
+    if ($u && !idle_check()) {
+        current_user(true);
+        $u = null;
+    }
     if (!$u) {
         redirect('admin/index.php');
     }
+    session_touch();
     if ($role === 'admin' && $u['role'] !== 'admin') {
         flash('error', 'Only administrators can open that page.');
         redirect('admin/dashboard.php');
@@ -647,4 +669,9 @@ function select_options(array $options, $selected, $assoc = false)
         $html .= '<option value="' . e($val) . '"' . ((string) $val === (string) $selected ? ' selected' : '') . '>' . e($v) . '</option>';
     }
     return $html;
+}
+
+/* ---------- Security gate for the public website (Admin › Security › "Whole site") ---------- */
+if (strpos((string) ($_SERVER['SCRIPT_NAME'] ?? ''), '/admin/') === false) {
+    security_gate(true);
 }

@@ -20,6 +20,7 @@ if (is_post()) {
         }
         q('DELETE FROM maintenance WHERE id = ?', [$id]);
         log_history($m['property_id'], $m['tenant_id'], 'maintenance', 'Repair record deleted: ' . $m['title']);
+        audit('delete', 'maintenance', $m['title'], 'Property #' . $m['property_id']);
         flash('success', 'Job deleted.');
         redirect('admin/property-view.php?id=' . $m['property_id'] . '&tab=maintenance');
     }
@@ -66,12 +67,14 @@ if (is_post()) {
             } elseif ((float) $m['cost'] !== (float) $data['cost']) {
                 log_history($data['property_id'], $data['tenant_id'], 'maintenance', 'Cost updated for “' . $data['title'] . '”: ' . money($m['cost'], 2) . ' → ' . money($data['cost'], 2));
             }
+            audit('update', 'maintenance', $data['title'] . ' — ' . $prop['title'], audit_diff($m, $data, ['title' => 'Job', 'status' => 'Status', 'priority' => 'Priority', 'cost' => 'Cost', 'contractor' => 'Contractor', 'completed_on' => 'Completed', 'charged_to' => 'Charged to']));
             flash('success', 'Job saved.');
         } else {
             $id = db_insert('maintenance', $data);
             log_history($data['property_id'], $data['tenant_id'], $data['status'] === 'completed' ? 'maintenance_done' : 'maintenance',
                 $catLabel . ' logged: ' . $data['title'],
                 trim(($data['area'] ? 'Area: ' . $data['area'] . "\n" : '') . (string) $data['description']), $data['reported_on']);
+            audit('insert', 'maintenance', $data['title'] . ' — ' . $prop['title'], $catLabel . ', ' . $data['status']);
             flash('success', 'Job logged. You can attach quotes, receipts and photos below.');
         }
         redirect('admin/maintenance-edit.php?id=' . $id);

@@ -26,9 +26,16 @@ if (is_post()) {
             }
             if ($id) {
                 db_update('users', $data, $id);
+                // A new password or a disabled account ends that user's other sessions (see current_user());
+                // keep the person who is saving signed in when they changed their own password.
+                if ($id === (int) $me['id'] && $pass !== '') {
+                    $_SESSION['pwv'] = pw_version($data['password_hash']);
+                    sessions_kick_user($id, true);
+                }
             } else {
                 db_insert('users', $data);
             }
+            audit($id ? 'update' : 'insert', 'users', $email, 'Role: ' . $data['role'] . ($data['is_active'] ? '' : ' (disabled)') . ($pass !== '' ? ' · password set' : ''));
             flash('success', 'User saved.');
         }
     } elseif ($action === 'delete') {
@@ -36,7 +43,10 @@ if (is_post()) {
         if ($id === (int) $me['id']) {
             flash('error', 'You cannot delete your own account.');
         } else {
+            $delEmail = (string) q_val('SELECT email FROM users WHERE id = ?', [$id]);
+            sessions_kick_user($id);
             q('DELETE FROM users WHERE id = ?', [$id]);
+            audit('delete', 'users', $delEmail);
             flash('success', 'User deleted.');
         }
     }

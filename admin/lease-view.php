@@ -31,6 +31,7 @@ if (is_post()) {
             log_history($l['property_id'], $l['tenant_id'], 'payment',
                 'Payment received: ' . money($amount, 2) . ' (' . $ptype . (post('period_label') ? ', ' . post('period_label') : '') . ') from ' . $tName,
                 trim(post('method') . ' ' . post('reference')), $date);
+            audit('insert', 'payments', $tName . ' — ' . $l['title'], money($amount, 2) . ' ' . $ptype . ' paid ' . $date . ' ' . trim(post('method') . ' ' . post('reference')));
             flash('success', 'Payment recorded.');
         }
     } elseif ($action === 'payment_delete') {
@@ -38,6 +39,7 @@ if (is_post()) {
         if ($pay) {
             q('DELETE FROM payments WHERE id = ?', [$pay['id']]);
             log_history($l['property_id'], $l['tenant_id'], 'payment', 'Payment of ' . money($pay['amount'], 2) . ' dated ' . fmt_date($pay['paid_on']) . ' was deleted');
+            audit('delete', 'payments', $tName . ' — ' . $l['title'], money($pay['amount'], 2) . ' dated ' . $pay['paid_on']);
             flash('success', 'Payment deleted.');
         }
     } elseif ($action === 'end' && in_array($l['status'], ['active', 'upcoming'], true)) {
@@ -51,6 +53,7 @@ if (is_post()) {
         $details = 'Move-out: ' . fmt_date($moveOut) . (post('end_reason') ? "\nReason: " . post('end_reason') : '')
             . ($refund !== null ? "\nDeposit refunded: " . money($refund, 2) . ' of ' . money($l['deposit'], 2) : '');
         log_history($l['property_id'], $l['tenant_id'], 'lease_end', ($newStatus === 'terminated' ? 'Lease terminated' : 'Lease ended') . ': ' . $tName . ' moved out of ' . $l['title'], $details, $moveOut);
+        audit('update', 'leases', $tName . ' — ' . $l['title'], ($newStatus === 'terminated' ? 'Terminated' : 'Ended') . "\n" . $details);
         flash('success', 'Lease closed. The property is available again.');
     } elseif ($action === 'delete') {
         foreach (q_all("SELECT id, file FROM documents WHERE entity_type = 'lease' AND entity_id = ?", [$id]) as $d) {
@@ -60,6 +63,7 @@ if (is_post()) {
         q('DELETE FROM leases WHERE id = ?', [$id]);
         release_after_lease($l['property_id'], $l['tenant_id']);
         log_history($l['property_id'], $l['tenant_id'], 'lease_update', 'Lease record deleted (' . fmt_date($l['start_date']) . ' – ' . fmt_date($l['end_date']) . ')');
+        audit('delete', 'leases', $tName . ' — ' . $l['title'], fmt_date($l['start_date']) . ' – ' . fmt_date($l['end_date']));
         flash('success', 'Lease deleted.');
         redirect('admin/leases.php');
     }

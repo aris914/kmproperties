@@ -9,6 +9,7 @@ if (is_post()) {
         $action = post('action');
         if ($action === 'update') {
             q('UPDATE inquiries SET status = ?, admin_notes = ? WHERE id = ?', [in_array(post('status'), ['new', 'contacted', 'closed'], true) ? post('status') : 'new', nn(post('admin_notes')), $inq['id']]);
+            audit('update', 'inquiries', $inq['name'], 'Status: ' . post('status'));
             flash('success', 'Inquiry updated.');
             redirect('admin/inquiries.php?view=' . $inq['id']);
         } elseif ($action === 'to_tenant') {
@@ -21,10 +22,12 @@ if (is_post()) {
             ]);
             log_history($inq['property_id'], $tid, 'created', 'Prospect tenant created from website inquiry');
             q("UPDATE inquiries SET status = 'contacted' WHERE id = ? AND status = 'new'", [$inq['id']]);
+            audit('insert', 'tenants', $inq['name'], 'Created from website inquiry #' . $inq['id']);
             flash('success', 'Tenant record created — check the name split and complete the details.');
             redirect('admin/tenant-edit.php?id=' . $tid);
         } elseif ($action === 'delete') {
             q('DELETE FROM inquiries WHERE id = ?', [$inq['id']]);
+            audit('delete', 'inquiries', $inq['name'], $inq['inquiry_type'] . ' inquiry of ' . $inq['created_at']);
             flash('success', 'Inquiry deleted.');
         }
     }

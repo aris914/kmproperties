@@ -25,6 +25,7 @@ if (is_post()) {
         q('DELETE FROM history WHERE tenant_id = ? AND property_id IS NULL', [$id]);
         q('UPDATE history SET tenant_id = NULL WHERE tenant_id = ?', [$id]);
         q('DELETE FROM tenants WHERE id = ?', [$id]);
+        audit('delete', 'tenants', tenant_name($t));
         flash('success', 'Tenant deleted.');
         redirect('admin/tenants.php');
     }
@@ -60,10 +61,12 @@ if (is_post()) {
             } else {
                 log_history(null, $id, 'updated', 'Tenant details updated');
             }
+            audit('update', 'tenants', tenant_name($data), audit_diff($t, $data, ['first_name' => 'First name', 'last_name' => 'Last name', 'status' => 'Status', 'phone' => 'Phone', 'email' => 'Email', 'id_number' => 'ID number', 'address' => 'Address']));
             flash('success', 'Tenant saved.');
         } else {
             $id = db_insert('tenants', $data);
             log_history(null, $id, 'created', 'Tenant record created');
+            audit('insert', 'tenants', tenant_name($data));
             flash('success', 'Tenant added.');
         }
         redirect('admin/tenant-view.php?id=' . $id);

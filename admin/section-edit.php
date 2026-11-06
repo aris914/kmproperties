@@ -44,6 +44,7 @@ if (is_post()) {
                 }
             }
             db_update('landing_sections', $data, $id);
+            audit('update', 'sections', $s['label']);
             flash('success', 'Section saved.');
         } elseif ($action === 'item_save' && $cfg['items'] !== null) {
             $itemId = (int) post('item_id');
@@ -67,6 +68,7 @@ if (is_post()) {
             }
             if ($existing) {
                 db_update('section_items', $data, $itemId);
+                audit('update', 'sections', $s['label'] . ' › ' . ($data['title'] ?: 'item'));
                 flash('success', 'Item updated.');
             } else {
                 $data['section_id'] = $id;
@@ -74,6 +76,7 @@ if (is_post()) {
                     $data['sort_order'] = (int) q_val('SELECT COALESCE(MAX(sort_order),0) + 1 FROM section_items WHERE section_id = ?', [$id]);
                 }
                 db_insert('section_items', $data);
+                audit('insert', 'sections', $s['label'] . ' › ' . ($data['title'] ?: 'item'));
                 flash('success', 'Item added.');
             }
         } elseif ($action === 'item_delete') {
@@ -83,6 +86,7 @@ if (is_post()) {
                     delete_file_safe(SITE_UPLOAD_DIR . '/' . $item['image']);
                 }
                 q('DELETE FROM section_items WHERE id = ?', [$item['id']]);
+                audit('delete', 'sections', $s['label'] . ' › ' . ($item['title'] ?: 'item'));
                 flash('success', 'Item removed.');
             }
         }

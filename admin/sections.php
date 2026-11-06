@@ -9,9 +9,11 @@ if (is_post()) {
         foreach ((array) ($_POST['sort'] ?? []) as $id => $sort) {
             q('UPDATE landing_sections SET sort_order = ? WHERE id = ?', [(int) $sort, (int) $id]);
         }
+        audit('update', 'sections', 'Section order');
         flash('success', 'Section order saved.');
     } elseif (post('action') === 'toggle') {
         q('UPDATE landing_sections SET is_active = 1 - is_active WHERE id = ?', [(int) post('id')]);
+        audit('update', 'sections', 'Section #' . (int) post('id'), 'Shown / hidden switched');
         flash('success', 'Section visibility updated.');
     }
     redirect('admin/sections.php');

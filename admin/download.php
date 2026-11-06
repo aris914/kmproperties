@@ -10,6 +10,7 @@ if (!$d || !$path || !$base || strpos($path, $base) !== 0 || !is_file($path)) {
     http_response_code(404);
     exit('File not found.');
 }
+audit('download', 'documents', $d['title'], $d['entity_type'] . ' #' . $d['entity_id'] . ' · ' . $d['original_name']);
 
 $inlineTypes = ['application/pdf', 'image/jpeg', 'image/png', 'image/webp', 'text/plain'];
 $mime = $d['mime'] ?: 'application/octet-stream';

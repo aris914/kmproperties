@@ -55,12 +55,14 @@ if (is_post()) {
                 $summary = $l['end_date'] !== $data['end_date'] && $data['end_date'] > (string) $l['end_date'] ? 'Lease renewed / extended' : 'Lease updated';
                 log_history($data['property_id'], $data['tenant_id'], 'lease_update', $summary . ' — ' . $tName, implode("\n", $changes));
             }
+            audit('update', 'leases', $tName . ' — ' . $prop['title'], $changes);
             flash('success', 'Lease saved.');
         } else {
             $id = db_insert('leases', $data);
             log_history($data['property_id'], $data['tenant_id'], 'lease_start',
                 ($data['status'] === 'upcoming' ? 'Lease signed (starts ' . fmt_date($data['start_date']) . ')' : 'Lease started') . ': ' . $tName . ' — ' . $prop['title'],
                 $details, $data['start_date'] <= date('Y-m-d') ? $data['start_date'] : date('Y-m-d'));
+            audit('insert', 'leases', $tName . ' — ' . $prop['title'], $details);
             flash('success', 'Lease created. You can now upload the signed contract and record payments.');
         }
 

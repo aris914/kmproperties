@@ -68,6 +68,7 @@ if (post('action') === 'upload') {
         list($pid, $tid) = doc_owner_ids($type, $eid);
         $label = ['property' => 'property', 'tenant' => 'tenant', 'lease' => 'lease', 'maintenance' => 'repair job'][$type];
         log_history($pid, $tid, 'document', count($saved) . ' document' . (count($saved) > 1 ? 's' : '') . ' uploaded to ' . $label, implode("\n", $saved));
+        audit('insert', 'documents', $label . ' #' . $eid, implode("\n", $saved));
         flash('success', count($saved) . ' document' . (count($saved) > 1 ? 's' : '') . ' uploaded.');
     }
 }
@@ -79,6 +80,7 @@ if (post('action') === 'delete') {
         q('DELETE FROM documents WHERE id = ?', [$d['id']]);
         list($pid, $tid) = doc_owner_ids($d['entity_type'], $d['entity_id']);
         log_history($pid, $tid, 'document', 'Document deleted: ' . $d['title']);
+        audit('delete', 'documents', $d['title'], $d['entity_type'] . ' #' . $d['entity_id'] . ' · ' . $d['original_name']);
         flash('success', 'Document deleted.');
     }
 }

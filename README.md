@@ -19,6 +19,9 @@ PHP / MySQL website for condominium rentals and property sales in Metro Manila, 
 - **Repairs & maintenance** — log repairs, maintenance, inspections and renovations per property (priority, status, contractor, cost, who pays) with quotes/receipts/before-after photos
 - **History** — an automatic timeline for every property and every tenant (listing changes, leases, move-outs, payments, repairs, documents) plus manual notes. Each property also has a *Tenancy history* tab and a *Repairs & maintenance* log with total spent.
 - **Documents** — upload PDF/Word/Excel/images to properties, tenants, leases and repair jobs. Stored outside public access and served only to logged-in admins.
+- **Security** — IP whitelist / blacklist, country rule (e.g. Philippines only), failed sign-in lockouts, idle sign-out, users online with Disconnect / Ban IP, refused-visits list. Emergency off-switch: `define('SECURITY_OFF', true);` in `includes/config.php`.
+- **Audit log** — every sign-in, failed sign-in and change, with user and IP; filters, CSV download, purge.
+- **Theme & layout** — colour presets, 7 menu layouts, page width, light/dark mode
 - **Inquiries**, **Locations**, **Site settings** (contact info, social links, logo, map), **Admin users** (administrator / staff), dashboard with expiring leases, open repairs and monthly figures
 
 ## Install

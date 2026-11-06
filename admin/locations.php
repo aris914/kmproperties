@@ -32,6 +32,7 @@ if (is_post()) {
             } else {
                 db_insert('locations', $data);
             }
+            audit($existing ? 'update' : 'insert', 'locations', $name);
             flash('success', 'Location saved.');
         } elseif ($action === 'delete') {
             $loc = q_one('SELECT * FROM locations WHERE id = ?', [(int) post('id')]);
@@ -40,6 +41,7 @@ if (is_post()) {
                     delete_file_safe(SITE_UPLOAD_DIR . '/' . $loc['image']);
                 }
                 q('DELETE FROM locations WHERE id = ?', [$loc['id']]);
+                audit('delete', 'locations', $loc['name']);
                 flash('success', 'Location deleted. Its properties now have no location.');
             }
         }

@@ -7,7 +7,8 @@ if (!is_post()) {
 csrf_check();
 
 $pid = (int) post('property_id');
-if (!q_val('SELECT id FROM properties WHERE id = ?', [$pid])) {
+$ptitle = q_val('SELECT title FROM properties WHERE id = ?', [$pid]);
+if (!$ptitle) {
     flash('error', 'Property not found.');
     redirect('admin/properties.php');
 }
@@ -43,6 +44,7 @@ if (post('action') === 'upload') {
     ensure_cover($pid);
     if ($ok) {
         log_history($pid, null, 'photo', $ok . ' photo' . ($ok > 1 ? 's' : '') . ' added');
+        audit('insert', 'photos', $ptitle, $ok . ' photo(s) uploaded');
         flash('success', $ok . ' photo' . ($ok > 1 ? 's' : '') . ' uploaded.');
     }
     redirect($back);
@@ -56,6 +58,7 @@ if (post('action') === 'save_all') {
             q('DELETE FROM property_photos WHERE id = ?', [$ph['id']]);
             ensure_cover($pid);
             log_history($pid, null, 'photo', 'Photo removed');
+            audit('delete', 'photos', $ptitle, $ph['file']);
             flash('success', 'Photo deleted.');
         }
         redirect($back);
@@ -65,8 +68,10 @@ if (post('action') === 'save_all') {
     }
     if (post('cover')) {
         q('UPDATE property_photos SET is_cover = (id = ?) WHERE property_id = ?', [(int) post('cover'), $pid]);
+        audit('update', 'photos', $ptitle, 'Cover photo changed');
         flash('success', 'Cover photo changed.');
     } else {
+        audit('update', 'photos', $ptitle, 'Captions / order saved');
         flash('success', 'Photos saved.');
     }
     redirect($back);

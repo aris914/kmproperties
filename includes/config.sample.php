@@ -18,3 +18,9 @@ define('DEBUG', false);
 // Upload limits (your host may cap these lower; InfinityFree allows 10 MB)
 define('MAX_PHOTO_MB', 8);
 define('MAX_DOC_MB', 10);
+
+// Emergency: locked out by Admin › Security rules? Uncomment, sign in, fix the rules, then comment it again.
+// define('SECURITY_OFF', true);
+
+// Only if the site sits behind Cloudflare or another proxy that sends the visitor's real IP address.
+// define('TRUST_PROXY', true);

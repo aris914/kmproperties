@@ -13,6 +13,7 @@ $tid = (int) post('tenant_id') ?: null;
 $summary = post('summary');
 if ($summary !== '' && ($pid || $tid)) {
     log_history($pid, $tid, 'note', $summary, post('details'), valid_date(post('event_date')) ?: date('Y-m-d'));
+    audit('insert', 'history', $summary, post('details'));
     flash('success', 'Note added to the history.');
 } else {
     flash('error', 'Write a short note first.');

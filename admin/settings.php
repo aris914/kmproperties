@@ -30,9 +30,13 @@ $fields = [
 
 if (is_post()) {
     csrf_check();
+    $changed = [];
     foreach ($fields as $group) {
         foreach ($group as $key => $meta) {
             $val = post($key);
+            if ((string) setting($key) !== (string) $val) {
+                $changed[] = $meta[0];
+            }
             if ($key === 'map_embed' && $val !== '') {
                 if (preg_match('~src="([^"]+)"~', $val, $m)) {
                     $val = html_entity_decode($m[1]);
@@ -61,6 +65,7 @@ if (is_post()) {
                 save_setting($key, '');
             }
         }
+        audit('update', 'settings', 'Site settings', $changed);
         flash('success', 'Settings saved.');
     } catch (RuntimeException $ex) {
         flash('error', $ex->getMessage());

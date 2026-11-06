@@ -1,6 +1,6 @@
 <?php
 require __DIR__ . '/includes/init.php';
-require_admin();
+$me = require_admin();
 
 $stats = q_one("SELECT
     SUM(listing_type = 'rent' AND status <> 'inactive') AS rent_total,
@@ -105,5 +105,29 @@ admin_header('Dashboard', 'dashboard');
       <div class="card-body"><?php history_timeline($recent, true, true); ?></div>
     </div>
   </div>
+  <?php if ($me['role'] === 'admin'):
+      $online = [];
+      $alerts = 0;
+      try {
+          $online = q_all('SELECT s.ip, s.user_agent, s.last_seen, s.session_key, u.name FROM user_sessions s JOIN users u ON u.id = s.user_id
+                           WHERE s.kicked_at IS NULL AND s.last_seen > NOW() - INTERVAL 5 MINUTE ORDER BY s.last_seen DESC');
+          $alerts = (int) q_val("SELECT COUNT(*) FROM audit_log WHERE action IN ('failed','locked') AND at > NOW() - INTERVAL 1 DAY");
+      } catch (Exception $ex) {
+      } ?>
+  <div class="col-12">
+    <div class="card">
+      <div class="card-header d-flex justify-content-between"><span><i class="bi bi-people me-2"></i>Users online (<?= count($online) ?>)</span><a href="<?= url('admin/security.php') ?>" class="small">Security</a></div>
+      <div class="card-body">
+        <?php if ($alerts): ?><div class="alert alert-warning py-2 small mb-3"><i class="bi bi-exclamation-triangle me-1"></i><?= $alerts ?> failed or locked sign-in<?= $alerts === 1 ? '' : 's' ?> in the last 24 hours. <a href="<?= url('admin/audit.php?area=session') ?>">See the audit log</a>.</div><?php endif; ?>
+        <?php if (!$online): ?><span class="hint">Nobody is signed in right now.</span><?php endif; ?>
+        <div class="d-flex flex-wrap gap-2">
+          <?php foreach ($online as $s): $g = ip_country_cached($s['ip']); ?>
+            <span class="pill <?= $s['session_key'] === session_key() ? 'adm' : 'act' ?>" title="<?= e(ua_short($s['user_agent'])) ?>">● <?= e($s['name']) ?> · <?= e($s['ip']) ?><?= $g ? ' ' . cc_flag($g['cc']) : '' ?></span>
+          <?php endforeach; ?>
+        </div>
+      </div>
+    </div>
+  </div>
+  <?php endif; ?>
 </div>
 <?php admin_footer();

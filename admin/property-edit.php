@@ -27,6 +27,7 @@ if (is_post()) {
         }
         q('DELETE FROM history WHERE property_id = ? AND tenant_id IS NULL', [$id]);
         q('DELETE FROM properties WHERE id = ?', [$id]);
+        audit('delete', 'properties', $p['title'], trim($p['code'] . ' ' . $p['building']));
         flash('success', 'Property “' . $p['title'] . '” and its photos, leases, repair records and documents were deleted.');
         redirect('admin/properties.php');
     }
@@ -81,10 +82,12 @@ if (is_post()) {
             } elseif ($changes) {
                 log_history($id, null, 'updated', 'Listing details updated', implode("\n", $changes));
             }
+            audit('update', 'properties', $data['title'], $changes);
             flash('success', 'Property saved.');
         } else {
             $id = db_insert('properties', $data);
             log_history($id, null, 'created', 'Property added (' . ($data['listing_type'] === 'rent' ? 'for rent' : 'for sale') . ')', 'Price: ' . money($data['price']));
+            audit('insert', 'properties', $data['title'], ($data['listing_type'] === 'rent' ? 'For rent' : 'For sale') . ', ' . money($data['price']));
             flash('success', 'Property created. Now add photos and documents.');
         }
 

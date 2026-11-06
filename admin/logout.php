@@ -1,8 +1,14 @@
 <?php
 require __DIR__ . '/includes/init.php';
-if (is_post()) {
-    csrf_check();
+if (!is_post()) {
+    redirect('admin/index.php');
 }
+csrf_check();
+$u = current_user();
+if ($u) {
+    audit('sign_out', 'session', $u['email'], null, $u);
+}
+session_end_row();
 $_SESSION = [];
 if (ini_get('session.use_cookies')) {
     $p = session_get_cookie_params();
