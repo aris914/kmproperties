@@ -1,6 +1,7 @@
 <?php
 /* Admin › Theme & layout: colours, menu layout, page width and light/dark mode for the admin panel
-   (modelled on the RBJocsing portal). Stored in settings.admin_theme (JSON). */
+   (modelled on the RBJocsing portal), and — unless turned off — the same colours on the public website.
+   Stored in settings.admin_theme (JSON). */
 
 function theme_defaults()
 {
@@ -79,6 +80,7 @@ function theme_clean(array $s)
     $out['layout'] = isset($s['layout']) && isset(theme_layouts()[$s['layout']]) ? $s['layout'] : 'panel';
     $out['width'] = isset($s['width']) && isset(theme_widths()[(string) $s['width']]) ? (string) $s['width'] : '1180';
     $out['mode'] = isset($s['mode']) && in_array($s['mode'], ['auto', 'light', 'dark'], true) ? $s['mode'] : 'auto';
+    $out['site'] = !isset($s['site']) || !empty($s['site']); // use the colours on the public website too
     return $out;
 }
 
@@ -102,4 +104,20 @@ function theme_head()
         . '<script>(function(){var m=' . json_encode($t['mode']) . ';try{var o=localStorage.getItem("kmup_mode");if(o)m=o}catch(e){}'
         . 'var d=m==="dark"||(m==="auto"&&window.matchMedia&&matchMedia("(prefers-color-scheme: dark)").matches);'
         . 'document.documentElement.setAttribute("data-bs-theme",d?"dark":"light")})();</script>';
+}
+
+/**
+ * Public website colours: the theme's primary / accent / highlight / background replace the
+ * K&M navy, teal and gold in assets/css/style.css. Empty when "Use on the website" is off.
+ */
+function theme_site_css()
+{
+    $t = theme_cfg();
+    if (!$t['site']) {
+        return '';
+    }
+    return '<style id="siteTheme">:root{--navy:' . $t['primary'] . ';--navy-2:color-mix(in srgb,' . $t['primary'] . ' 82%,#fff);--navy-deep:' . $t['bg1']
+        . ';--teal:' . $t['accent'] . ';--teal-2:color-mix(in srgb,' . $t['accent'] . ' 82%,#fff);--gold:' . $t['highlight']
+        . ';--gold-2:color-mix(in srgb,' . $t['highlight'] . ' 82%,#000);--on-gold:' . theme_on($t['highlight'])
+        . ';--on-navy:' . theme_on($t['primary']) . '}</style>';
 }

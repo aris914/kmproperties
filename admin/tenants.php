@@ -34,7 +34,7 @@ admin_header('Tenants', 'tenants');
   <?php if (!$rows): ?><tr><td colspan="6" class="text-center text-muted py-4">No tenants found.</td></tr><?php endif; ?>
   <?php foreach ($rows as $t): ?>
     <tr class="clickable" onclick="if(!event.target.closest('a,button'))location.href='<?= url('admin/tenant-view.php?id=' . $t['id']) ?>'">
-      <td><span class="avatar-sm"><?= e(mb_strtoupper(mb_substr($t['first_name'], 0, 1) . mb_substr($t['last_name'], 0, 1))) ?></span> <strong><?= e($t['last_name'] . ', ' . $t['first_name']) ?></strong><?php if ($t['occupation']): ?><div class="small text-muted ms-5"><?= e($t['occupation']) ?></div><?php endif; ?></td>
+      <td><span class="avatar-sm"><?= e(mb_strtoupper(mb_substr($t['first_name'], 0, 1) . mb_substr($t['last_name'], 0, 1))) ?></span> <strong><?= e($t['last_name'] . ', ' . $t['first_name']) ?></strong><?php if (!empty($t['is_test'])): ?> <span class="badge text-bg-secondary">TEST</span><?php endif; ?><?php if ($t['occupation']): ?><div class="small text-muted ms-5"><?= e($t['occupation']) ?></div><?php endif; ?></td>
       <td class="small"><?= e($t['phone']) ?><div class="text-muted"><?= e($t['email']) ?></div></td>
       <td class="small"><?= $t['current_property'] ? '<a href="' . url('admin/lease-view.php?id=' . $t['current_lease']) . '">' . e($t['current_property']) . '</a>' : '<span class="text-muted">—</span>' ?></td>
       <td><?= (int) $t['lease_count'] ?></td>

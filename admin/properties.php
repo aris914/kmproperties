@@ -57,6 +57,7 @@ admin_header('Properties', 'properties');
         <td>
           <a href="<?= url('admin/property-view.php?id=' . $p['id']) ?>" class="fw-semibold text-decoration-none"><?= e($p['title']) ?></a>
           <?php if ($p['is_featured']): ?><i class="bi bi-star-fill text-warning" title="Featured"></i><?php endif; ?>
+          <?php if (!empty($p['is_test'])): ?><span class="badge text-bg-secondary">TEST</span><?php endif; ?>
           <div class="small text-muted"><?= e(implode(' · ', array_filter([$p['code'], $p['building'], $p['unit_no'] ? 'Unit ' . $p['unit_no'] : '', $p['location_name']]))) ?></div>
           <div class="small text-muted"><i class="bi bi-images"></i> <?= (int) $p['photo_count'] ?> · <i class="bi bi-eye"></i> <?= (int) $p['views'] ?></div>
         </td>

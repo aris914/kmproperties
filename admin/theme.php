@@ -8,7 +8,7 @@ if (is_post()) {
     csrf_check();
     $old = theme_cfg();
     $new = post('reset') ? [] : [
-        'layout' => post('layout'), 'width' => post('width'), 'mode' => post('mode'),
+        'layout' => post('layout'), 'width' => post('width'), 'mode' => post('mode'), 'site' => post('site') ? 1 : 0,
     ];
     if (!post('reset')) {
         foreach (array_keys(theme_defaults()) as $k) {
@@ -17,7 +17,7 @@ if (is_post()) {
     }
     $clean = theme_clean($new);
     save_setting('admin_theme', json_encode($clean));
-    $labels = ['layout' => 'Layout', 'width' => 'Page width', 'mode' => 'Appearance'];
+    $labels = ['layout' => 'Layout', 'width' => 'Page width', 'mode' => 'Appearance', 'site' => 'Colours on public website'];
     foreach (theme_labels() as $k => $l) {
         $labels[$k] = $l[0];
     }
@@ -30,7 +30,7 @@ $t = theme_cfg();
 $defs = theme_defaults();
 admin_header('Theme & Layout', 'theme');
 ?>
-<p class="hint">Changes preview instantly on this page. Click <b>Save theme</b> to apply them for everyone. The <i class="bi bi-circle-half"></i> button in the header lets each person switch light / dark mode for their own browser.</p>
+<p class="hint">Changes preview instantly on this page. Click <b>Save theme</b> to apply them for everyone — and to the public website when “Use on the website” is on. The <i class="bi bi-circle-half"></i> button in the header lets each person switch light / dark mode for their own browser.</p>
 <form method="post" id="themeForm">
   <?= csrf_field() ?>
   <div class="row g-4">
@@ -54,6 +54,12 @@ admin_header('Theme & Layout', 'theme');
       </div>
     </div>
     <div class="col-xl-5">
+      <div class="bkbox">
+        <h2><i class="bi bi-globe2 me-1"></i>Public website</h2>
+        <div class="form-check form-switch my-2"><input class="form-check-input" type="checkbox" name="site" value="1" id="siteCol" <?= $t['site'] ? 'checked' : '' ?>><label class="form-check-label fw-semibold" for="siteCol">Use these colours on the website</label></div>
+        <p class="hint mb-2">Header &amp; primary → website header, footer and dark sections · Accent → prices, links and teal buttons · Active menu item → gold buttons and highlights · Background top → footer and location tiles. Off = the original K&amp;M navy, teal and gold.</p>
+        <a href="<?= url('index.php') ?>" target="_blank" class="btn btn-sm btn-light"><i class="bi bi-box-arrow-up-right me-1"></i>Open the website (shows the saved colours)</a>
+      </div>
       <div class="bkbox">
         <h2>Layout</h2>
         <p class="hint">How the admin menu and pages are arranged for everyone.</p>

@@ -37,6 +37,7 @@ function admin_nav()
             ['users', 'users.php', 'bi-person-gear', 'Users', 0],
             ['security', 'security.php', 'bi-shield-lock', 'Security', 0],
             ['audit', 'audit.php', 'bi-journal-text', 'Audit Log', 0],
+            ['testdata', 'test-data.php', 'bi-database-gear', 'Test Data', 0],
         ];
     }
     return $nav;

@@ -1,5 +1,4 @@
 <?php
-require __DIR__ . '/theme.php';
 require __DIR__ . '/shell.php';
 
 /** Renders the timeline list for history rows. */

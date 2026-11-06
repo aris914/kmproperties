@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.3.0 — 2026-11-06
+- **Theme colours on the public website**: Admin › Theme & Layout now also colours the website (header, hero, buttons, prices, badges, footer). Switch "Use these colours on the website" off to keep the original K&M navy, teal and gold. Text on highlight buttons switches between dark and light automatically. The white logo now has a transparent background so it fits any header colour.
+- **Admin › Test Data** (administrators only): add made-up records for a full workflow — properties for rent and sale with generated photos and map pins, tenants, leases (re-let unit with a former tenant, lease ending soon, upcoming lease, rent behind), payments, repairs in every status with costs and receipts, sample PDF documents, owner submissions (waiting and rejected), inquiries and history. Shows totals vs test records, and clears only test data or, after typing DELETE, all records. Test records show a TEST badge and codes starting with TEST-.
+- Database: adds an is_test flag (applied automatically after the deploy).
+
 ## 1.2.0 — 2026-11-06
 - **List Your Property** now creates a real listing: owners add details, amenities, up to 12 photos (made smaller in the browser so they upload quickly) and a **map pin** (search the building, use their location, or click the map). Spam protection: hidden bot field and 3 submissions per hour.
 - Submissions wait for approval and stay hidden. New **Admin › Owner Submissions** (with a badge for pending ones): review, edit, preview, then **Approve & publish**, **Approve, keep hidden**, or **Reject** with a reason. The dashboard shows a notice when submissions are waiting. Each submission is also saved as an inquiry.

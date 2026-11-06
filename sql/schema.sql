@@ -95,6 +95,7 @@ CREATE TABLE IF NOT EXISTS properties (
   reviewed_at DATETIME NULL,
   reviewed_by INT UNSIGNED NULL,
   review_note VARCHAR(255) NULL,
+  is_test TINYINT(1) NOT NULL DEFAULT 0,
   owner_name VARCHAR(150) NULL,
   owner_phone VARCHAR(60) NULL,
   owner_email VARCHAR(190) NULL,
@@ -136,6 +137,7 @@ CREATE TABLE IF NOT EXISTS tenants (
   emergency_phone VARCHAR(60) NULL,
   emergency_relation VARCHAR(60) NULL,
   status ENUM('prospect','active','former','blacklisted') NOT NULL DEFAULT 'prospect',
+  is_test TINYINT(1) NOT NULL DEFAULT 0,
   notes TEXT NULL,
   created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -252,6 +254,7 @@ CREATE TABLE IF NOT EXISTS inquiries (
   status ENUM('new','contacted','closed') NOT NULL DEFAULT 'new',
   admin_notes TEXT NULL,
   ip VARCHAR(45) NULL,
+  is_test TINYINT(1) NOT NULL DEFAULT 0,
   created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   KEY idx_inq_status (status),
   CONSTRAINT fk_inq_prop FOREIGN KEY (property_id) REFERENCES properties(id) ON DELETE SET NULL
